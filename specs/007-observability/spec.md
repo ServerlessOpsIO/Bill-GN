@@ -300,12 +300,13 @@ where specified; confirm that conditions not on the list raise no alert.
     should arrive without extra work, provided the account is linked for metric streaming.
   - Traces: the existing path does not deliver traces to Datadog today, but it already
     shares the cloud provider's traces with the central observability account and grants
-    read access to them. The first approach to try for FR-018 (project owner's suggestion,
-    2026-11-14) is to have Datadog collect those existing traces through its integration for
-    the cloud provider's tracing service, which would need no new infrastructure in this
-    project. Planning is to confirm that the hosting platform's traces for the agent are
-    complete when collected this way, and what it adds to the monitoring bill. If it falls
-    short, the fallback is to send traces to Datadog directly from Bill-GN.
+    read access to them. For now (project owner's decision, 2026-11-14), FR-018 is met by
+    having Datadog collect those traces through its integration for the cloud provider's
+    tracing service, AWS X-Ray, which should need no new infrastructure in this project.
+    Planning is to confirm that the hosting platform's traces for the agent are complete when
+    collected this way, and what it adds to the monitoring bill. Comparing this with
+    instrumenting Bill-GN using a Datadog tracing library is a separate research follow-up
+    and not part of this feature.
 - Features 001 and 002 already require a record per request with a correlation identifier,
   outcome and duration, and that failed requests are retained. This feature makes those
   records consistent, joined up across components, and visible in the monitoring system. It
