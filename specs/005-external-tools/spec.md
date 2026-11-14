@@ -229,6 +229,10 @@ it; review the records and confirm each lookup made during testing can be found.
   per day) this is assumed to be low; the per-question lookup limit also bounds it.
 - The defaults for the time allowance per lookup (about 10 seconds) and the maximum lookups
   per question (3) may be adjusted during planning.
+- Where the Slack features are in place, their time targets (features 002 and 003) are
+  extended for questions that use a lookup to the limits in this specification, and the
+  working-on-it indication covers the wait. Questions that use no lookup keep the earlier
+  targets.
 - Looked-up information is not vetted by the project owner. It is presented as coming from
   its source, not as fact GN vouches for.
 - Results are not stored beyond answering the question, other than within a remembered
