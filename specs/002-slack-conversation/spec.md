@@ -8,6 +8,10 @@
 
 **Input**: User description: "Slack conversation: A user sends GN a direct message in Slack, or @-mentions GN in a channel, and receives GN's answer (from the GN expert agent of feature 001) as a threaded reply. Covers: verifying that each incoming request genuinely comes from Slack before anything else happens; acknowledging Slack quickly so it does not retry; handling duplicate deliveries so a question is answered once; showing a 'working on it' indicator while GN prepares the answer; replying with a friendly message when GN cannot answer; ignoring messages from bots and from GN itself; failed work is not silently lost. Each message is treated as a standalone question in this feature (conversation memory is feature 003). Depends on feature 001."
 
+**Naming**: In Slack the bot appears as **Bill-GN** and is mentioned as `@Bill-GN` (project
+owner's decision, 2026-11-14). This specification calls it GN for short; "@-mentions GN" means
+typing `@Bill-GN`.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Ask GN from a channel, get the answer in a direct message (Priority: P1)
@@ -214,6 +218,8 @@ confirm each is rejected, produces no reply and is recorded.
   records.
 - **FR-017**: The Slack integration MUST be granted access to the GN expert agent explicitly,
   as feature 001 requires of every caller.
+- **FR-020**: The bot MUST appear in Slack under the name `Bill-GN`, so that people mention it
+  as `@Bill-GN` and find its direct message under that name.
 - **FR-018**: The one-time steps to create and connect the Slack app MUST be documented so
   another person can repeat them.
 
@@ -262,6 +268,8 @@ confirm each is rejected, produces no reply and is recorded.
 
 ## Assumptions
 
+- The Slack name `Bill-GN` is the bot's display name and handle. How GN refers to itself in
+  its answers is governed by its persona (feature 001) and is not changed by this feature.
 - GN is installed in a single Slack workspace owned by the project. Distribution to other
   workspaces is out of scope.
 - Everyone in that workspace may use GN. Per-person or per-channel permissions are out of
