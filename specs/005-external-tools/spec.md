@@ -278,9 +278,14 @@ it; review the records and confirm each lookup made during testing can be found.
 
 ## Assumptions
 
-- Bill-GN looks things up with a search of the approved sites, falling back to a general web
-  search (clarified 2026-11-14). The owner expects there are useful sources they do not yet
-  know of, which is why the open web is allowed as a fallback.
+- For now, Bill-GN looks things up with the hosting platform's managed web browser (project
+  owner's decision, 2026-11-14): it visits the approved sites and uses their own search and
+  pages, and falls back to the open web the same way. No separate search service is used.
+  The owner expects there are useful sources they do not yet know of, which is why the open
+  web is allowed as a fallback.
+- Building dedicated tools for individual approved sites (for example, one that uses a
+  forum's own programming interface) is to be researched later and is not part of this
+  feature. It is tracked as a follow-up.
 - The approved site list starts with: turbobuick.com, gbodyforum.com, turbobuicks.com,
   gnttype.org, and the Buick Grand National and GNX forum on buickforums.com, plus the sites
   of vendors of third-party parts as the owner names them.
@@ -292,12 +297,15 @@ it; review the records and confirm each lookup made during testing can be found.
 - A dedicated parts-catalog or pricing service may be added later through the same mechanism
   if a suitable one with a usable interface is identified.
 - The approved set is small, on the order of one to three tools.
-- Tools are provided by outside services through a standard tool protocol named in the
-  project's technical direction; the choice of services is made during planning.
+- The managed browser is treated as one approved tool. Further tools, whether dedicated
+  per-site tools or a search service, may be added later through the same approval steps
+  (FR-014).
 - Outside services may charge per use. At the expected usage (a small team, tens of questions
   per day) this is assumed to be low; the per-question lookup limit also bounds it.
 - The defaults for the time allowance per lookup (about 10 seconds) and the maximum lookups
-  per question (3) may be adjusted during planning.
+  per question (3) were set before the browser was chosen. Browsing a site is slower than
+  calling a search service, so these, and the targets in SC-005, are to be checked against
+  real measurements during planning and adjusted if they cannot be met.
 - Where the Slack features are in place, their time targets (features 002 and 003) are
   extended for questions that use a lookup to the limits in this specification, and the
   working-on-it indication covers the wait. Questions that use no lookup keep the earlier
