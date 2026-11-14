@@ -1,12 +1,16 @@
-# Feature Specification: Thread Memory
+# Feature Specification: Conversation Memory
 
-**Feature Branch**: `spec/003-thread-memory`
+**Feature Branch**: `spec/003-conversation-memory`
 
 **Created**: 2026-11-14
 
 **Status**: Draft
 
 **Input**: User description: "Thread memory: Follow-up messages in the same Slack thread (in a channel or a direct message) continue the same conversation with GN, so a person can ask 'and what about the rear?' and GN understands it in light of what was said earlier in that thread, including after a long pause. Each thread is its own conversation; different threads and different people's threads never share context. Covers how long a conversation is remembered, what happens when it gets very long, and removing remembered conversations. Depends on feature 002 (Slack conversation) and changes feature 001's 'each request stands alone' behavior for Slack threads only."
+
+**Note**: This feature was first described as "thread memory". It was renamed on 2026-11-14
+after the project owner decided GN holds conversations only in direct messages, without
+threads. The original description above is kept as written.
 
 ## User Scenarios & Testing *(mandatory)*
 

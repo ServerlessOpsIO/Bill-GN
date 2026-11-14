@@ -1,4 +1,4 @@
-# Specification Quality Checklist: Thread Memory
+# Specification Quality Checklist: Conversation Memory
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-11-14
