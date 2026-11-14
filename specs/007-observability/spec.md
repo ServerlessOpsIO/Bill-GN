@@ -246,10 +246,11 @@ where specified; confirm that conditions not on the list raise no alert.
   debugging. An operator diagnosing a bad answer asks the person for the question.
 - Cost figures are estimates derived from usage. The cloud bill remains the authoritative
   figure.
-- This feature can be delivered in stages alongside the others: the parts covering features
-  001 and 002 first, with each later feature adding its own measurements when it is built.
-- The order of work is undecided: observability may be more useful built early, before
-  features 003 to 006, even though it is numbered last.
+- This feature is built last, after features 001 to 006 (project owner's decision,
+  2026-11-14). The owner accepts that this may mean reworking code already written for those
+  features and amending their specifications.
+- Until it is built, features 001 to 006 rely on the per-request records their own
+  specifications require, with no health view, no joined-up trace and no alerts.
 - Expected usage is low (a small team, tens of questions per day), so the volume and cost of
   records is small.
 - Technology choices are fixed by the project constitution and are addressed in the plan, not
