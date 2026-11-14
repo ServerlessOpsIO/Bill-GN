@@ -128,6 +128,12 @@ which specialists handled each question.
 
 ### Edge Cases
 
+- The shadow comparison is on but delegation is off: nothing is compared, because no question
+  is delegated.
+- The shadow comparison fails or is slow: the person's reply is unaffected; the failure is
+  recorded and no verdict is counted for that question.
+- A question Bill-GN chose not to delegate: not compared.
+
 - One specialist uses all six lookups before the others have made any: the others answer
   without lookups; the event is recorded, showing which specialist used them.
 - The lookup limit is reached while a specialist is part-way through its work: it stops
@@ -205,6 +211,21 @@ which specialists handled each question.
   that the project owner switches it by changing that value and deploying. It MUST be off by
   default, and with it off Bill-GN behaves exactly as it did before this feature. The
   feature's tests are run with it switched on.
+- **FR-020**: Bill-GN MUST support a shadow comparison for delegated questions. When it is on
+  and a delegated question is selected, Bill-GN MUST also produce the answer it would have
+  given without delegation, have the two answers compared, and record a verdict: the
+  delegated answer was better than, the same as, or worse than the single-agent answer. The
+  person MUST receive only the delegated answer, and the comparison MUST NOT delay it.
+- **FR-021**: The shadow comparison MUST have its own on or off setting among the project's
+  deployment parameters, separate from the delegation setting, and a sampling rate that sets
+  the share of delegated questions compared. It MUST be off by default. The sampling rate
+  defaults to 100%.
+- **FR-022**: Each verdict MUST be recorded with the request's correlation identifier and the
+  specialists consulted, and counted so that the share of delegated answers judged worse can
+  be seen over time. The record MUST NOT contain question text, either answer's text, or the
+  comparison's reasoning.
+- **FR-023**: A failure of the shadow comparison MUST NOT affect the reply to the person, and
+  MUST be recorded.
 
 ### Key Entities
 
@@ -214,6 +235,9 @@ which specialists handled each question.
   area of expertise, and the rules it follows.
 - **Consultation**: One hand-off of work from Bill-GN to a specialist. Attributes: the specialist,
   what was asked, what was returned, the outcome, the duration, and the request it belongs to.
+- **Shadow comparison**: For one delegated question, the single-agent answer produced behind
+  the scenes and the verdict from comparing it with the delegated answer. Only the verdict is
+  kept.
 - **Delegation limits**: The maximum number of consultations per question and the time
   allowance per specialist.
 
@@ -250,6 +274,13 @@ which specialists handled each question.
   the records, each showing who was refused and how many lookups each participant had used.
 - **SC-014**: Across all delegated replies in testing, 0 mention specialists, delegation or
   other agents, and 0 describe colleagues or helpers.
+- **SC-015**: With the shadow comparison on at a 100% sampling rate, 100% of delegated
+  questions in testing have a recorded verdict or a recorded comparison failure, and the
+  person's reply arrives no later than it does with the comparison off.
+- **SC-016**: A review of the shadow comparison's records finds no question text, no answer
+  text and no reasoning text.
+- **SC-017**: With the shadow comparison off, 0 single-agent answers are produced for
+  delegated questions.
 
 ## Assumptions
 
@@ -282,6 +313,17 @@ which specialists handled each question.
   fail the feature. The limits on the number of consultations and lookups remain firm.
 - One specialist using all of the shared lookups before the others is accepted for now. It is
   recorded when it happens (FR-018) and reviewed in the follow-up research.
+- The shadow comparison (requested by the project owner, 2026-11-14) exists so that a
+  delegated answer that is worse than the single agent's is noticed and counted. Its verdicts
+  come from a model comparing two answers, which can be wrong, especially about exact
+  figures; they show a trend and are not proof. They supplement the blind review in SC-001
+  and feed the research into multiple agents against a single agent.
+- A compared question costs roughly three times as much as a delegated question alone: the
+  second answer plus the comparison. The on or off setting and the sampling rate are the
+  controls. While the project owner is the only user, comparing every delegated question is
+  affordable.
+- The single-agent answer produced for comparison may use the reference collection but makes
+  no live lookups of its own, so that a comparison does not double the load on outside sites.
 - This feature works without features 002 to 005, but is expected to add the most value once
   specialists can draw on reference material and lookups.
 - Expected usage is low (a small team, tens of questions per day).
