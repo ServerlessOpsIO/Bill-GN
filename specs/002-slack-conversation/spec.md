@@ -12,13 +12,24 @@
 starts a conversation from a channel by @-mentioning it: `@Bill-GN`. The original description
 above, written before the name was chosen, calls it GN.
 
+## Clarifications
+
+### Session 2026-11-14
+
+- Q: Who in the Slack workspace is allowed to use Bill-GN: full members only, or also guests and people from other organizations in shared channels? → A: Full members and guests. People from other organizations in shared channels are ignored.
+- Q: When someone @-mentions Bill-GN in a channel, what should the people in that channel see? → A: Both a reaction on the person's message that everyone in the channel sees, and a note that only the asker sees, with a link to the direct message.
+- Q: When someone @-mentions Bill-GN in a channel with a message that depends on what was said just before, should Bill-GN read the surrounding messages to understand the question? → A: No. Bill-GN reads only the message that mentions it. If the question is not clear on its own, it asks the person in their direct message to restate it.
+- Q: Should there be a limit on how many questions one person can ask Bill-GN in a given period? → A: Yes, two limits: a per-person limit and an overall daily limit across everyone.
+- Q: When Bill-GN fails to answer people, should it actively alert someone, or is it enough that failures are recorded for an operator to find? → A: Record only in this feature. Observability, including how failures reach the team's monitoring and whether anything alerts, becomes a separate feature (007).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Ask Bill-GN from a channel, get the answer in a direct message (Priority: P1)
 
 A member of the Slack workspace @-mentions Bill-GN in a channel with a question about the Grand
-National. Bill-GN does not answer in the channel. It marks the person's message to show it has
-responded privately, and sends its answer to that person in their direct message with Bill-GN,
+National. Bill-GN does not answer in the channel. It adds a reaction to the person's message, which
+everyone in the channel can see, shows the asker a note that only they can see with a link to
+the direct message, and sends its answer to that person in their direct message with Bill-GN,
 where the conversation can continue.
 
 **Why this priority**: People think of a question while talking in a channel, so that is
@@ -38,8 +49,9 @@ privately, and one answer arrives in the asker's direct message with Bill-GN.
    **Then** the direct message shows which question is being answered and links back to the
    message in the channel.
 3. **Given** a person @-mentions Bill-GN in a channel, **When** Bill-GN has received the question,
-   **Then** within a few seconds the person's message in the channel shows a sign that Bill-GN is
-   responding in a direct message, visible to everyone in the channel.
+   **Then** within a few seconds the person's message in the channel carries a reaction from
+   Bill-GN that everyone in the channel can see, and the asker sees a note, visible only to
+   them, saying the answer is in their direct message and linking to it.
 4. **Given** a person @-mentions Bill-GN inside a thread in a channel, **When** Bill-GN answers,
    **Then** it behaves the same way: the answer goes to the person's direct message and
    nothing is posted in the thread.
@@ -136,6 +148,24 @@ confirm each is rejected, produces no reply and is recorded.
 
 ### Edge Cases
 
+- A person reaches the per-person limit: Bill-GN tells them once, with the time they can ask
+  again, and stays silent to their further questions until then.
+- The overall daily limit is reached: each person who asks is told once that Bill-GN is done
+  for the day.
+- A busy group direct message: each message counts against the person who posted it, and
+  against the daily limit.
+- A limit is reached on a channel mention: the notice goes to the asker's direct message, with
+  the usual reaction and private note in the channel.
+
+- A channel mention that depends on earlier messages (for example, "@Bill-GN what do you
+  think?" in a thread about a misfire): Bill-GN does not read the earlier messages. Its direct
+  message reply says it only saw that one message and asks the person to restate the question
+  in full.
+
+- A person from another organization @-mentions Bill-GN in a shared channel: ignored, with no
+  reply of any kind; the event is recorded.
+- A guest @-mentions Bill-GN or sends it a direct message: answered like any member.
+
 - A message from another bot, or from Bill-GN itself: ignored, so Bill-GN never answers itself or loops
   with another bot.
 - An edited or deleted message: ignored. Only newly posted messages are answered.
@@ -184,9 +214,11 @@ confirm each is rejected, produces no reply and is recorded.
 - **FR-003**: Bill-GN MUST post its response as an ordinary message in the direct message
   conversation and MUST NOT use a thread. A response to a channel mention MUST show which
   question it answers and MUST link back to the person's message in the channel.
-- **FR-019**: When Bill-GN responds to a channel mention, the person's message in the channel MUST
-  show a sign, visible to channel members, that Bill-GN responded in a direct message. This sign
-  MUST NOT be a message posted in the channel.
+- **FR-019**: When Bill-GN responds to a channel mention, it MUST do both of the following in
+  the channel, and nothing else: add a reaction to the person's message, visible to all
+  channel members; and show the asker a note, visible only to them, saying the answer is in
+  their direct message and linking to it. Bill-GN MUST NOT post a message that other channel
+  members can see.
 - **FR-004**: The response MUST be the answer produced by the Bill-GN expert agent (feature 001)
   for the text of the person's message with any mention of Bill-GN removed.
 - **FR-005**: The authenticity of every incoming request MUST be verified before any other
@@ -202,6 +234,22 @@ confirm each is rejected, produces no reply and is recorded.
   message, posted where the answer would have appeared, containing no internal detail.
 - **FR-010**: Bill-GN MUST ignore messages from bots, including itself, and MUST ignore message
   edits and deletions.
+- **FR-021**: Bill-GN MUST answer full members and guests of the workspace. It MUST ignore
+  messages from people who belong to another organization (for example, in a channel shared
+  with that organization): no answer, no direct message, no reaction and no note.
+- **FR-022**: For a channel mention, Bill-GN MUST use only the text of the message that
+  mentions it. It MUST NOT read other messages in the channel or thread. When that text is
+  not a question it can answer on its own, its direct message reply MUST ask the person to
+  restate the full question there.
+- **FR-023**: Bill-GN MUST enforce a per-person limit on questions (default: 30 per person per
+  hour). When a person exceeds it, Bill-GN MUST tell them once that they have reached the
+  limit and when they can ask again, and MUST NOT answer their further questions until then.
+- **FR-024**: Bill-GN MUST enforce an overall daily limit on questions across all people
+  (default: 300 per day). Once it is reached, Bill-GN MUST tell each person who asks, once,
+  that it has reached its limit for the day and when it will be available again.
+- **FR-025**: Questions refused because of a limit MUST NOT be sent to the expert agent, and
+  each refusal MUST be recorded. Both limits MUST be adjustable by the project owner without
+  changing Bill-GN's other behavior.
 - **FR-011**: Bill-GN MUST NOT respond to channel messages that do not mention it.
 - **FR-012**: A request that cannot be completed after retrying MUST be retained for
   inspection by an operator and MUST NOT be silently discarded.
@@ -245,8 +293,9 @@ confirm each is rejected, produces no reply and is recorded.
 - **SC-001**: Across at least 20 test questions split between channel mentions and direct
   messages, 100% receive exactly one reply in the correct direct message conversation, and Bill-GN
   posts 0 messages in any channel.
-- **SC-012**: For 100% of channel mentions in that set, the person's message in the channel
-  shows the sign that Bill-GN responded in a direct message, and the reply links back to it.
+- **SC-012**: For 100% of channel mentions in that set, the person's message carries Bill-GN's
+  reaction, the asker sees the private note with a working link to the direct message, other
+  channel members see no note, and the reply links back to the channel message.
 - **SC-002**: 95% of questions receive their answer in Slack within 40 seconds of being
   posted.
 - **SC-003**: For 95% of questions, the working-on-it indication appears within 5 seconds.
@@ -260,6 +309,15 @@ confirm each is rejected, produces no reply and is recorded.
   none disappears.
 - **SC-008**: Bill-GN posts no reply to any message from a bot, from itself, to an edit, or to a
   channel message without a mention, across a test set covering each case.
+- **SC-013**: Across a test set with at least 3 messages each from a full member, a guest and
+  a person from another organization, 100% of the member and guest messages are answered and
+  0 of the external person's messages receive any response.
+- **SC-014**: For at least 5 channel mentions that depend on earlier messages, 100% of replies
+  ask the person to restate the question and none uses content from the earlier messages.
+- **SC-015**: With the per-person limit set to a test value, the first question past the limit
+  gets the limit notice, further questions get no reply, and questions are answered again
+  once the period ends, in 100% of trials. The same holds for the daily limit.
+- **SC-016**: 0 questions refused by a limit reach the expert agent.
 - **SC-009**: 100% of test requests can be traced from arrival to reply by correlation
   identifier, and a review of the records finds no secrets or message text.
 - **SC-010**: A new person can create and connect the Slack app in a fresh workspace using
@@ -271,7 +329,8 @@ confirm each is rejected, produces no reply and is recorded.
 
 - Bill-GN is installed in a single Slack workspace owned by the project. Distribution to other
   workspaces is out of scope.
-- Everyone in that workspace may use Bill-GN. Per-person or per-channel permissions are out of
+- Full members and guests of the workspace may use Bill-GN; people from other organizations
+  may not (clarified 2026-11-14). Finer per-person or per-channel permissions are out of
   scope.
 - Conversation memory is out of scope. A follow-up in a direct message is answered as a
   standalone question until feature 003.
@@ -280,10 +339,9 @@ confirm each is rejected, produces no reply and is recorded.
   message. Each person has exactly one direct message with Bill-GN, so answers to all their
   channel mentions arrive in that one conversation.
 - Answers to channel mentions are therefore private to the asker. Other channel members see
-  only the sign on the message, not the answer.
-- The sign on the channel message is something lightweight such as a reaction; its exact form
-  is chosen during planning, and it may be the same sign used as the working-on-it
-  indication.
+  only the reaction on the message, not the answer or the asker's note.
+- Which emoji the reaction uses is chosen during planning. In a channel the reaction may also
+  serve as the working-on-it indication.
 - Group direct messages behave like one-to-one direct messages (project owner's decision,
   2026-11-14): no mention is needed and no thread is used. Adding Bill-GN to a group direct message
   therefore means Bill-GN reads and answers everything posted there, including messages members
@@ -301,6 +359,13 @@ confirm each is rejected, produces no reply and is recorded.
   delivery time.
 - Slack's response deadline and message size limit are those published by Slack at the time
   of planning.
+- The limit defaults (30 questions per person per hour, 300 per day overall) are starting
+  values set well above expected use; they exist to cap runaway cost, not to ration normal
+  use.
+- This feature records failures and retains failed requests (FR-012, FR-015) but does not
+  alert anyone. Monitoring, metrics and alerting are the subject of a separate observability
+  feature (007); until it exists, a failure is noticed when someone looks or a person
+  complains.
 - Expected usage is low (a small team, tens of questions per day), with occasional bursts of
   a few questions at once.
 - Bill-GN replies in English only, as in feature 001.

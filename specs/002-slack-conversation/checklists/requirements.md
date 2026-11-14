@@ -35,4 +35,5 @@
   independently.
 - No clarification markers remain; open choices are recorded as assumptions for the clarify
   phase.
+- Clarify session 2026-11-14: five questions answered by the project owner (who may use Bill-GN, what the channel shows on a mention, reading surrounding messages, usage limits, alerting on failure). Checklist re-validated by the spec author after the updates: 16/16 items pass, no change in state. Not reviewed independently.
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`
