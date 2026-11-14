@@ -16,7 +16,7 @@
 - Q: When sources disagree about the same thing, whose word should Bill-GN lead with? → A: Bill's. Bill-GN leads with Bill's practice where one exists, always states the factory figure alongside it, and mentions community or vendor sources after. For a third-party part, the vendor's figure leads.
 - Q: Who has to approve a reference item before Bill-GN is allowed to use it? → A: The project owner alone. Every item, of every kind, is approved by the owner through the project's normal change process.
 - Q: Who writes the first set of reference items that ships with this feature? → A: The implementer drafts items from the sources the owner names (factory data, the named forums, vendor publications), each with its source cited, and the owner checks and approves each one. Items marked as Bill's practice come from the owner.
-- Q: What should the first collection of reference items concentrate on? → A: Maintenance essentials: factory specifications, fluid types and capacities, torque values and service intervals for the 1987 Grand National. Troubleshooting and performance material are added afterwards as content, through the same drafting and approval steps.
+- Q: What should the first collection of reference items concentrate on? → A: A thin slice of all three areas: a few items each from maintenance essentials, troubleshooting, and performance and racing. The owner first chose maintenance essentials alone, then changed to this because the factory and vendor data that maintenance essentials depend on has to be obtained over time.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -266,19 +266,22 @@ steps, and confirm Bill-GN gives the corrected value.
   it.
 - Vendor sources are the manuals, publications and other information published by the makers
   of third-party parts that the cars in scope may be fitted with.
-- The initial collection covers maintenance essentials for the 1987 Grand National: factory
-  specifications, fluid types and capacities, torque values and service intervals. It is on
-  the order of tens of items.
-- Troubleshooting material (known faults, symptoms, diagnosis) and performance material
-  (modifications, tuning settings, third-party parts with vendors' figures) are not part of
-  the initial collection. They are added later as content only, in batches, using the
-  publishing steps this feature delivers (FR-010) and the same drafting and approval rules
-  (FR-021, FR-022). Adding them needs no new feature and no change to Bill-GN. Each batch is
-  tracked as its own issue.
-- Until those batches exist, Bill-GN answers troubleshooting and performance questions under
-  feature 001's rules and says the reference does not cover them.
-- Reference material is text, including tables. Diagrams, photographs and scanned pages are
-  out of scope.
+- The initial collection is a thin slice across three areas, a few items from each, on the
+  order of tens of items in total:
+  - maintenance essentials (specifications, fluid types and capacities, torque values,
+    service intervals);
+  - troubleshooting (known faults, their symptoms, diagnosis and fixes);
+  - performance and racing (modifications, tuning settings, third-party parts with their
+    vendors' figures).
+- Which items go in each slice depends on which sources can be read at the time. Factory and
+  vendor data in particular will be obtained by the project owner over time, so the
+  maintenance slice starts small and grows as that material arrives.
+- After the initial collection, each area is filled out as content only, in batches, using
+  the publishing steps this feature delivers (FR-010) and the same drafting and approval
+  rules (FR-021, FR-022). Adding items needs no new feature and no change to Bill-GN. Each
+  batch is tracked as its own issue.
+- Where the reference has no item for a question, Bill-GN answers under feature 001's rules
+  and says the reference does not cover it.
 - The material is the same for everyone who asks. Per-person or per-car material is out of
   scope.
 - Updates are made by the project owner through the project's normal change process, not by
