@@ -204,7 +204,9 @@ it; review the records and confirm each lookup made during testing can be found.
 - **FR-008**: Bill-GN SHOULD answer from its own knowledge or the reference material when that is
   sufficient, and use a lookup only when the question needs current or outside information.
 - **FR-009**: Each lookup MUST have a time allowance, and each question MUST have a maximum
-  number of lookups. When either is reached Bill-GN MUST answer with what it has.
+  number of lookups (6). When either is reached Bill-GN MUST answer with what it has. Each
+  time the maximum is reached, that MUST be recorded with the request's correlation
+  identifier, without question text, so the limit can be reviewed.
 - **FR-010**: When a tool is unavailable, fails or times out, Bill-GN MUST still answer, MUST say
   that it could not complete the lookup, and MUST NOT expose internal error detail.
 - **FR-011**: Credentials for outside services MUST be stored as managed secrets and MUST NOT
@@ -306,8 +308,9 @@ it; review the records and confirm each lookup made during testing can be found.
   per-question lookup limit and feature 002's usage limits bound both.
 - The time figures in this specification (about 10 seconds per lookup, the 45 and 90 second
   figures in SC-005) are soft targets for now (project owner's decision, 2026-11-14). They are
-  measured and reported, and a miss does not fail the feature. The maximum of 3 lookups per
-  question remains a firm limit.
+  measured and reported, and a miss does not fail the feature. The maximum of 6 lookups per
+  question (raised from 3 by the project owner during the clarification of feature 006)
+  remains a firm limit.
 - Whether each approved site lets an automated browser in is not known and will be found out
   during development. A site that cannot be reached this way is treated as returning nothing
   (FR-010) and is noted for the follow-up research on dedicated tools.

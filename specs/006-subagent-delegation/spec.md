@@ -182,10 +182,10 @@ which specialists handled each question.
 - **FR-013**: Specialists MUST be able to consult the reference collection (feature 004) and
   perform live lookups (feature 005) themselves, where those features are in place, under the
   same rules as Bill-GN.
-- **FR-017**: All lookups made for one delegated question, by Bill-GN and by every specialist
-  together, MUST count against a single limit of 6 lookups. Once it is reached, no further
-  lookup is made for that question, and whoever needed one answers with what it has. For a
-  delegated question this limit replaces the per-question limit in feature 005.
+- **FR-017**: All lookups made for one question, by Bill-GN and by every specialist together,
+  MUST count against a single limit of 6 lookups, the same limit that applies to a question
+  Bill-GN answers alone (feature 005, FR-009). Once it is reached, no further lookup is made
+  for that question, and whoever needed one answers with what it has.
 - **FR-018**: Each time the lookup limit is reached, that MUST be recorded with the request's
   correlation identifier, who was refused a lookup (Bill-GN or which specialist), and how many
   lookups each had used, without recording question text. The limit MUST be adjustable by the
@@ -200,10 +200,12 @@ which specialists handled each question.
   answer text.
 - **FR-015**: The project owner MUST be able to add, change or remove a specialist by
   documented steps.
-- **FR-016**: Delegation MUST be controlled by a single setting that the project owner can
-  change without changing Bill-GN's other behavior. It MUST be off by default: the feature is
-  delivered switched off, and with it off Bill-GN behaves exactly as it did before this
-  feature. The feature's tests are run with it switched on.
+- **FR-016**: Delegation MUST be controlled by a single on or off setting among the project's
+  deployment parameters (the `cfn-parameters.json` file, passed to the deployed stack), so
+  that the project owner switches it by changing that value and deploying. It MUST be off by
+  default, and with it off Bill-GN behaves exactly as it did before this feature. The
+  feature's tests are run with it switched on.
+
 ### Key Entities
 
 - **Orchestrator**: Bill-GN itself, which reads the question, decides whether to delegate, and
@@ -228,8 +230,9 @@ which specialists handled each question.
 - **SC-003**: On feature 001's representative review set, at least 70% of questions are
   answered without delegation.
 - **SC-004**: 95% of questions answered without delegation meet feature 001's time limit.
-- **SC-005**: 95% of delegated questions are answered within 60 seconds, and none takes longer
-  than 120 seconds.
+- **SC-005**: Soft target: 95% of delegated questions are answered within 60 seconds, and
+  none takes longer than 120 seconds. The measured figures are reported; missing them does
+  not fail the feature.
 - **SC-006**: With each specialist made unavailable in turn, 100% of questions receive exactly
   one answer, and each affected answer states which area was not covered in depth.
 - **SC-007**: No question triggers more consultations than the defined maximum, across all
@@ -268,11 +271,17 @@ which specialists handled each question.
 - Where the Slack features are in place, their time targets are extended for delegated
   questions to the limits in this specification, and the working-on-it indication covers the
   wait.
-- Six shared lookups per delegated question is a starting value chosen by the project owner.
+- Six shared lookups per question is a starting value chosen by the project owner.
   It is to be evaluated after the service has real usage, using the records of when the limit
   is reached. If sharing a limit among specialists works poorly in practice, the fallback is
   for only Bill-GN to perform lookups and pass results to the specialists.
-- A question that is not delegated keeps feature 005's limit of 3 lookups.
+- The limit of 6 lookups is the same whether or not a question is delegated (project owner's
+  decision, 2026-11-14); feature 005 was updated to match.
+- The time figures in this specification (about 20 seconds per specialist, and the figures in
+  SC-005) are soft targets, as in feature 005: measured and reported, and a miss does not
+  fail the feature. The limits on the number of consultations and lookups remain firm.
+- One specialist using all of the shared lookups before the others is accepted for now. It is
+  recorded when it happens (FR-018) and reviewed in the follow-up research.
 - This feature works without features 002 to 005, but is expected to add the most value once
   specialists can draw on reference material and lookups.
 - Expected usage is low (a small team, tens of questions per day).
