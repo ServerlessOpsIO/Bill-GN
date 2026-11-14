@@ -217,7 +217,7 @@ where specified; confirm that conditions not on the list raise no alert.
 - **FR-011**: There MUST be exactly two alert conditions to begin with, and a condition not on
   this list MUST NOT raise an alert:
   - Bill-GN is failing most requests: more than half of the questions received fail over a
-    15-minute period in which at least 5 questions were received.
+    60-minute period in which at least 5 questions were received.
   - Usage is approaching the daily limit: the number of questions in the current day reaches
     80% of the overall daily limit (feature 002).
   Each alert MUST go to the project owner, within 10 minutes of the condition becoming true.
@@ -309,7 +309,10 @@ where specified; confirm that conditions not on the list raise no alert.
 - The project owner decided in feature 002's clarification that failures are recorded and not
   alerted on, and confirmed here (2026-11-14) a minimal set of two alerts for the cases that
   looking cannot catch in time. Individual failures still raise no alert.
-- The thresholds in FR-011 (more than half failing over 15 minutes with at least 5 questions;
+- Alerts are tuned to fire readily at first and tightened over time (project owner's
+  decision, 2026-11-14): receiving an alert that turns out to be unnecessary is preferred to
+  missing one. The 60-minute window was chosen so that the alert can trigger at low traffic.
+- The thresholds in FR-011 (more than half failing over 60 minutes with at least 5 questions;
   80% of the daily limit; notice within 10 minutes) are starting values. How the alert
   reaches the owner (for example email or a Slack message) is chosen in planning.
 - The health view and alerts are built directly in Datadog (project owner's decision,
