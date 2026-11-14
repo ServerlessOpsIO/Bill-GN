@@ -8,6 +8,16 @@
 
 **Input**: User description: "Reference knowledge skill: Give GN packaged, vetted Grand National reference material (factory specifications, torque values, fluid capacities, part numbers, service procedures, common faults) that it consults when a question needs exact figures or procedures, so answers come from a vetted source rather than only the model's general recall. GN says when an answer comes from the reference material and names the source; when the reference does not cover something GN falls back to the honesty rules of feature 001. The project owner supplies and maintains the reference material. Depends on feature 001."
 
+## Clarifications
+
+### Session 2026-11-14
+
+- Q: Where will Bill-GN's reference material come from? → A: Four kinds of source, each item labelled with its kind: factory data; Bill's own practices; community sources (turbobuick.com, gbodyforum.com, turbobuicks.com, gnttype.org and the Buick Grand National and GNX forum on buickforums.com); and manuals, publications and other information from the vendors of third-party parts.
+- Q: When sources disagree about the same thing, whose word should Bill-GN lead with? → A: Bill's. Bill-GN leads with Bill's practice where one exists, always states the factory figure alongside it, and mentions community or vendor sources after. For a third-party part, the vendor's figure leads.
+- Q: Who has to approve a reference item before Bill-GN is allowed to use it? → A: The project owner alone. Every item, of every kind, is approved by the owner through the project's normal change process.
+- Q: Who writes the first set of reference items that ships with this feature? → A: The implementer drafts items from the sources the owner names (factory data, the named forums, vendor publications), each with its source cited, and the owner checks and approves each one. Items marked as Bill's practice come from the owner.
+- Q: What should the first collection of reference items concentrate on? → A: A thin slice of all three areas: a few items each from maintenance essentials, troubleshooting, and performance and racing. The owner first chose maintenance essentials alone, then changed to this because the factory and vendor data that maintenance essentials depend on has to be obtained over time.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Get an exact figure from a vetted source (Priority: P1)
@@ -113,10 +123,17 @@ steps, and confirm Bill-GN gives the corrected value.
 
 ### Edge Cases
 
+- A question about a car fitted with a third-party part (for example, an aftermarket turbo or
+  fuel pump): Bill-GN uses the vendor's figures for that part where the reference has them,
+  says they are the vendor's, and does not apply factory figures for the part it replaced.
+- A community item and a factory item disagree: Bill-GN gives both, says which is which, and
+  does not present the community finding as a factory figure.
+
 - The reference material is unavailable when a question arrives: Bill-GN answers under feature
   001's rules, does not claim any reference source, and the failure is recorded.
-- Two parts of the reference material disagree: Bill-GN gives both values, names both sources and
-  says they conflict.
+- Two reference items of the same kind disagree (for example, two factory publications):
+  Bill-GN gives both values, names both sources and says they conflict. Items of different
+  kinds are ordered as FR-019 sets out.
 - The person asks for a value in different units from the reference: Bill-GN gives the reference
   value in its original units and may add a conversion, labeled as a conversion.
 - The person asks about a related car (GNX, other model years) that the reference covers only
@@ -147,8 +164,26 @@ steps, and confirm Bill-GN gives the corrected value.
   MUST be able to tell which statements come from the reference.
 - **FR-008**: When giving a reference procedure, Bill-GN MUST preserve the order of steps and MUST
   include the reference's warnings.
-- **FR-009**: Each item of reference material MUST record its source, and SHOULD record which
-  cars and model years it applies to.
+- **FR-009**: Each item of reference material MUST record its source and the kind of source
+  it comes from, and SHOULD record which cars and model years it applies to. The kinds are:
+  factory (GM service manuals and publications); Bill (the real Bill's own practices and
+  preferences); community (the forums named in Assumptions); and vendor (manuals,
+  publications and other information from the makers of third-party parts).
+- **FR-017**: When Bill-GN answers from the reference material, the answer MUST make the kind
+  of source clear, so a person can tell a factory figure from Bill's practice, a community
+  finding or a vendor's instruction.
+- **FR-018**: A reference item about a third-party part MUST name the part and its vendor,
+  and Bill-GN MUST apply it only to that part, not to the factory part it replaces.
+- **FR-019**: When reference items of different kinds disagree about the same thing, Bill-GN
+  MUST lead with Bill's practice where one exists, MUST state the factory figure alongside it,
+  and MAY then mention community or vendor sources. Where the question concerns a third-party
+  part, the vendor's figure for that part MUST lead. Each figure MUST be labelled with its
+  kind of source.
+- **FR-020**: Where Bill's practice departs from the factory figure on work that affects
+  safety, the answer MUST say so and include the safety warning that feature 001 requires.
+- **FR-021**: A reference item MUST NOT be used by Bill-GN until the project owner has
+  approved it through the project's normal change process. This applies to every kind of
+  source, including items marked as Bill's practice and community items.
 - **FR-010**: The project owner MUST be able to add, correct and remove reference material and
   publish the change by documented steps, without changing Bill-GN's other behavior.
 - **FR-011**: Reference material MUST be checked when it is published; material that is
@@ -163,13 +198,21 @@ steps, and confirm Bill-GN gives the corrected value.
   apply; reference material adds knowledge and does not widen Bill-GN's scope.
 - **FR-015**: Bill-GN MUST NOT reproduce large portions of reference material verbatim.
 - **FR-016**: An initial set of reference material MUST be delivered with this feature,
-  sufficient to demonstrate the success criteria.
+  sufficient to demonstrate the success criteria. Factory, community and vendor items in it
+  are drafted during implementation from the named sources, each citing the specific source
+  it was taken from, and each MUST be approved by the project owner before use (FR-021).
+  Items marked as Bill's practice are written by the project owner.
+- **FR-022**: A drafted item MUST be taken from a source that was actually read, and MUST
+  cite it precisely enough for the owner to check it (for example, the publication and
+  section, or the address of the forum thread). An item MUST NOT be drafted from general
+  recall.
 
 ### Key Entities
 
 - **Reference item**: One piece of vetted knowledge, such as a specification table, a
-  procedure or a fault description. Attributes: its content, its source, the cars and years
-  it applies to, and when it was last reviewed.
+  procedure or a fault description. Attributes: its content, its source, the kind of source
+  (factory, Bill, community or vendor), the cars and years it applies to, the third-party
+  part and vendor it concerns (if any), and when it was last reviewed.
 - **Reference collection**: The published set of reference items Bill-GN uses. Has a version, so
   the owner can tell which set Bill-GN is answering from.
 - **Citation**: The source named in an answer for a statement taken from a reference item.
@@ -198,17 +241,47 @@ steps, and confirm Bill-GN gives the corrected value.
 - **SC-009**: Feature 001's success criteria for relevance, declining off-topic requests and
   safety warnings (SC-001, SC-002, SC-004) still pass with this feature in place.
 - **SC-010**: 95% of questions are answered within the time limit set in feature 001.
+- **SC-011**: On a review set of at least 10 questions where the reference holds both Bill's
+  practice and a factory figure that differs, 100% of answers lead with Bill's practice, state
+  the factory figure, and label each correctly.
+- **SC-012**: On a review set of at least 5 questions about third-party parts with vendor
+  items in the reference, 100% of answers lead with the vendor's figure and none applies a
+  factory figure to the third-party part.
 
 ## Assumptions
 
 - The project owner supplies the reference material and is responsible for its accuracy and
-  for having the right to use it. Material is written or summarized by the owner; factory
-  manuals and other copyrighted works are not copied in wholesale.
-- The initial collection is small: on the order of tens of items covering common
-  specifications, fluid capacities, torque values, maintenance procedures and well-known
-  faults for the 1987 Grand National.
-- Reference material is text, including tables. Diagrams, photographs and scanned pages are
-  out of scope.
+  for having the right to use it. Material is written or summarized by the owner, with the
+  source noted; factory manuals, forum posts, vendor publications and other copyrighted works
+  are not copied in wholesale.
+- Community sources for reference items are: turbobuick.com, gbodyforum.com, turbobuicks.com,
+  gnttype.org, and the Buick Grand National and GNX forum on buickforums.com. A community
+  item is something the owner has chosen and written up from these sites; this feature does
+  not search them live. Live lookups of outside sites are feature 005.
+- The project owner is the sole approver of reference items (clarified 2026-11-14). The real
+  Bill does not review them; the owner is responsible for items marked as Bill's practice
+  being a fair account of what he does.
+- Factory publications that are not freely available must be provided by the project owner
+  for items to be drafted from them. Where a source cannot be read, no item is drafted from
+  it.
+- Vendor sources are the manuals, publications and other information published by the makers
+  of third-party parts that the cars in scope may be fitted with.
+- The initial collection is a thin slice across three areas, a few items from each, on the
+  order of tens of items in total:
+  - maintenance essentials (specifications, fluid types and capacities, torque values,
+    service intervals);
+  - troubleshooting (known faults, their symptoms, diagnosis and fixes);
+  - performance and racing (modifications, tuning settings, third-party parts with their
+    vendors' figures).
+- Which items go in each slice depends on which sources can be read at the time. Factory and
+  vendor data in particular will be obtained by the project owner over time, so the
+  maintenance slice starts small and grows as that material arrives.
+- After the initial collection, each area is filled out as content only, in batches, using
+  the publishing steps this feature delivers (FR-010) and the same drafting and approval
+  rules (FR-021, FR-022). Adding items needs no new feature and no change to Bill-GN. Each
+  batch is tracked as its own issue.
+- Where the reference has no item for a question, Bill-GN answers under feature 001's rules
+  and says the reference does not cover it.
 - The material is the same for everyone who asks. Per-person or per-car material is out of
   scope.
 - Updates are made by the project owner through the project's normal change process, not by
