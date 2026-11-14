@@ -1,4 +1,4 @@
-# Specification Quality Checklist: GN Expert Agent
+# Specification Quality Checklist: Bill-GN Expert Agent
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-11-13
