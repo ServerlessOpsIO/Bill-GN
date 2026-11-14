@@ -42,21 +42,24 @@ question and confirm one answer appears in a thread under that message.
 ### User Story 2 - Ask GN in a direct message (Priority: P1)
 
 A person sends GN a direct message with a question, without needing to @-mention it, and
-receives GN's answer in that conversation.
+receives GN's answer as an ordinary message in that direct message conversation, with no
+thread.
 
 **Why this priority**: Direct messages are the other half of how people expect to reach a
 bot, and the request that started this project names both.
 
 **Independent Test**: Open a direct message with GN, send a Grand National question with no
-mention, and confirm one answer appears as a threaded reply to that message.
+mention, and confirm one answer appears as the next message in the direct message, not in a
+thread.
 
 **Acceptance Scenarios**:
 
 1. **Given** a person has a direct message conversation with GN, **When** they send a
-   question, **Then** GN posts one answer as a reply in a thread under that message.
+   question, **Then** GN posts one answer as a message in the direct message conversation
+   itself, not in a thread.
 2. **Given** a person sends two separate questions in a direct message, **When** GN answers
-   them, **Then** each answer appears under its own question and each question is treated as
-   standalone.
+   them, **Then** the answers appear in the conversation in the order the questions were
+   sent, and each question is treated as standalone.
 3. **Given** a person sends a direct message, **When** GN has received it, **Then** the person
    sees the same working-on-it indication as in a channel.
 
@@ -80,13 +83,13 @@ and the failed request can be found afterwards.
 1. **Given** Slack delivers the same message event more than once, **When** GN processes
    them, **Then** the person receives exactly one answer.
 2. **Given** GN cannot produce an answer, **When** the attempt fails, **Then** the person
-   receives one friendly message in the thread saying GN could not answer and inviting them to
-   try again, with no internal detail.
+   receives one friendly message, posted where the answer would have appeared, saying GN
+   could not answer and inviting them to try again, with no internal detail.
 3. **Given** a request fails in a way that prevents any reply, **When** it has been retried
    without success, **Then** the failed request is kept where an operator can find and inspect
    it, and it is not silently discarded.
 4. **Given** GN declines a question as off-topic (feature 001), **When** it replies, **Then**
-   the decline is posted in the thread like any other answer.
+   the decline is posted where any other answer would appear.
 
 ---
 
@@ -124,11 +127,18 @@ confirm each is rejected, produces no reply and is recorded.
   what the person wants to know (the behavior defined in feature 001).
 - A question longer than GN's maximum: the person is told the question is too long (feature
   001).
-- An answer longer than Slack allows in one message: it is split across consecutive replies
-  in the same thread, in order, with nothing lost.
+- An answer longer than Slack allows in one message: it is split across consecutive messages
+  in the same place (the thread in a channel, the conversation in a direct message), in
+  order, with nothing lost.
 - GN is @-mentioned in a channel it is not a member of: it cannot reply; the event is
   recorded and no error is shown to the person.
 - An @-mention inside a direct message: answered once, not twice.
+- A person replies inside a thread in a direct message: GN answers in the main direct message
+  conversation, as for any other direct message.
+- Two questions sent in a direct message before GN has answered the first: both are answered,
+  in the order they were sent.
+- A group direct message that includes GN and several people: treated like a channel. GN
+  responds only when @-mentioned and replies in a thread.
 - Many questions arriving at once: each is answered; none is dropped. Answers may take
   longer.
 - GN takes much longer than usual: the working-on-it indication remains until an answer or a
@@ -144,9 +154,10 @@ confirm each is rejected, produces no reply and is recorded.
 - **FR-001**: GN MUST respond when a person @-mentions it in a channel it is a member of.
 - **FR-002**: GN MUST respond when a person sends it a direct message, with no mention
   required.
-- **FR-003**: GN MUST post its response as a reply in a thread: under the person's message
-  when that message is top-level, or in the existing thread when the message is already in
-  one.
+- **FR-003**: In a channel, GN MUST post its response as a reply in a thread: under the
+  person's message when that message is top-level, or in the existing thread when the message
+  is already in one. In a direct message, GN MUST post its response as an ordinary message in
+  the conversation and MUST NOT use a thread.
 - **FR-004**: The response MUST be the answer produced by the GN expert agent (feature 001)
   for the text of the person's message with any mention of GN removed.
 - **FR-005**: The authenticity of every incoming request MUST be verified before any other
@@ -159,15 +170,15 @@ confirm each is rejected, produces no reply and is recorded.
   working, appearing within 5 seconds of their message and removed or replaced when the
   response is posted.
 - **FR-009**: When GN cannot produce an answer, the person MUST receive one friendly failure
-  message in the thread, containing no internal detail.
+  message, posted where the answer would have appeared, containing no internal detail.
 - **FR-010**: GN MUST ignore messages from bots, including itself, and MUST ignore message
   edits and deletions.
 - **FR-011**: GN MUST NOT respond to channel messages that do not mention it.
 - **FR-012**: A request that cannot be completed after retrying MUST be retained for
   inspection by an operator and MUST NOT be silently discarded.
 - **FR-013**: Answers MUST be presented readably in Slack, including lists and emphasis, and
-  answers that exceed Slack's message size MUST be split across ordered replies in the same
-  thread.
+  answers that exceed Slack's message size MUST be split across ordered messages in the same
+  place.
 - **FR-014**: Each message MUST be treated as a standalone question in this feature; earlier
   messages in the thread or conversation are not used.
 - **FR-015**: Each request MUST be traceable from its arrival to the posted reply by a single
@@ -188,8 +199,8 @@ confirm each is rejected, produces no reply and is recorded.
   unique identifier for the delivery.
 - **Question**: The message text with the mention of GN removed, passed to the GN expert
   agent. Carries a correlation identifier.
-- **Reply**: What GN posts back. Attributes: the text (possibly in several parts), the thread
-  it is posted in, its kind (answer, decline, input rejection, or failure message), and the
+- **Reply**: What GN posts back. Attributes: the text (possibly in several parts), where it
+  is posted (a channel thread or a direct message conversation), its kind (answer, decline, input rejection, or failure message), and the
   same correlation identifier.
 - **Working indicator**: The temporary sign that GN is preparing a reply, tied to one message.
 - **Failed request**: A request that could not be completed after retries, kept with enough
@@ -200,7 +211,8 @@ confirm each is rejected, produces no reply and is recorded.
 ### Measurable Outcomes
 
 - **SC-001**: Across at least 20 test questions split between channel mentions and direct
-  messages, 100% receive exactly one reply in the correct thread.
+  messages, 100% receive exactly one reply in the correct place: the thread for a channel
+  mention, the conversation itself for a direct message.
 - **SC-002**: 95% of questions receive their answer in Slack within 40 seconds of being
   posted.
 - **SC-003**: For 95% of questions, the working-on-it indication appears within 5 seconds.
@@ -227,10 +239,11 @@ confirm each is rejected, produces no reply and is recorded.
   workspaces is out of scope.
 - Everyone in that workspace may use GN. Per-person or per-channel permissions are out of
   scope.
-- Conversation memory is out of scope. A follow-up in a thread is answered as a standalone
-  question until feature 003.
-- In a direct message GN replies in a thread under the person's message, consistent with
-  channels, so that feature 003 can treat a thread as one conversation everywhere.
+- Conversation memory is out of scope. A follow-up in a channel thread or in a direct message
+  is answered as a standalone question until feature 003.
+- Direct messages do not use threads (project owner's decision, 2026-11-14): a direct message
+  with GN reads as one continuous back-and-forth. Feature 003 treats the whole direct message
+  as one conversation and each channel thread as one conversation.
 - In channels GN responds only to messages that @-mention it, including follow-ups inside a
   thread it has already answered in.
 - Slash commands, buttons, the app home tab, reactions as input, files and images are out of
