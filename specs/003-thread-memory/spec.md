@@ -83,7 +83,7 @@ conversation and confirm a follow-up there is treated as new.
 3. **Given** a remembered conversation, **When** an operator removes it, **Then** a later
    follow-up in that thread is answered as a new conversation.
 4. **Given** a conversation past its retention period, **When** that period ends, **Then**
-   the remembered conversation is removed without anyone acting.
+   the remembered conversation is no longer used and is deleted without anyone acting.
 
 ---
 
@@ -105,7 +105,7 @@ conversation and confirm a follow-up there is treated as new.
 - An earlier attempt to change GN's role, remembered in the thread: has no lasting effect on
   later answers.
 - GN invoked directly rather than through Slack (feature 001's direct use): unchanged, each
-  request stands alone unless the caller identifies a conversation.
+  request stands alone.
 
 ## Requirements *(mandatory)*
 
@@ -119,8 +119,9 @@ conversation and confirm a follow-up there is treated as new.
   two threads belonging to the same person.
 - **FR-003**: A conversation MUST remain available for follow-ups for 30 days after the last
   message in it, regardless of how long the pause between messages is within that period.
-- **FR-004**: A remembered conversation MUST be removed automatically once 30 days have
-  passed since its last message.
+- **FR-004**: A remembered conversation MUST stop being used as soon as 30 days have passed
+  since its last message, and MUST be deleted from storage automatically within 24 hours
+  after that.
 - **FR-005**: When a follow-up arrives after the conversation has been removed, GN MUST answer
   it as a new conversation and MUST tell the person it no longer has the earlier discussion.
 - **FR-006**: When a conversation grows too long to use in full, GN MUST keep the most recent
@@ -139,7 +140,8 @@ conversation and confirm a follow-up there is treated as new.
   answer regardless of what earlier messages in the conversation said.
 - **FR-013**: Request records MUST identify the conversation a request belongs to without
   recording message text.
-- **FR-014**: Direct use of GN without Slack MUST keep working as in feature 001.
+- **FR-014**: Direct use of GN without Slack MUST keep working as in feature 001, with every
+  request independent.
 - **FR-015**: The documentation MUST state what GN remembers, for how long, and how to have
   it removed.
 
@@ -166,8 +168,9 @@ conversation and confirm a follow-up there is treated as new.
   within the time limit set in feature 002.
 - **SC-005**: After an operator removes a conversation, 100% of follow-ups in that thread are
   answered as new conversations.
-- **SC-006**: Conversations are no longer retrievable within 24 hours after their retention
-  period ends, verified on at least 3 test conversations with a shortened period.
+- **SC-006**: On at least 3 test conversations with a shortened retention period, 100% of
+  follow-ups sent after the period ends are answered as new conversations, and each
+  conversation is found deleted from storage within 24 hours after the period ends.
 - **SC-007**: When memory is made unavailable, 100% of messages still receive an answer that
   states the earlier discussion could not be recalled.
 - **SC-008**: A review of request records finds conversation identifiers and no message text.
