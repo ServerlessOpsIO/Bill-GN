@@ -12,6 +12,16 @@
 after the project owner decided Bill-GN holds conversations only in direct messages, without
 threads. The original description above is kept as written.
 
+## Clarifications
+
+### Session 2026-11-14
+
+- Q: How long should Bill-GN remember a conversation after the last message in it? → A: 30 days after the last message.
+- Q: Should a person be able to make Bill-GN forget their conversation themselves, without asking an operator? → A: Yes, by telling Bill-GN in plain words. Bill-GN confirms, removes what it remembered and treats the next message as a new conversation. In a group direct message any member can do this for the whole group conversation.
+- Q: When someone asks Bill-GN a question by @-mentioning it in a channel, should the answer take their ongoing direct message conversation into account? → A: Yes. A channel question is treated exactly like a message typed in the direct message: it uses the earlier exchanges and becomes part of the conversation.
+- Q: Should the people who operate Bill-GN be able to read what users and Bill-GN said in a remembered conversation? → A: No routine reading. Operators can list and remove conversations, but reading the content requires a deliberate, recorded step.
+- Q: How much of a long conversation should Bill-GN bring to each new question in full, before it falls back to a summary of the older parts? → A: The last 10 exchanges in full, plus a summary of everything older.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Ask a follow-up in the same conversation (Priority: P1)
@@ -110,9 +120,18 @@ new.
   answer become part of the asker's direct message conversation.
 - A new message in a direct message: continues that direct message's one conversation, however
   different its subject. Bill-GN uses earlier exchanges only where they are relevant.
-- A person wants to start afresh in a direct message: they say so, and Bill-GN answers the new
-  question on its own terms; the earlier exchanges stay remembered until they expire or an
-  operator removes them.
+- A person tells Bill-GN to forget the conversation or start over: Bill-GN confirms, removes
+  what it remembered of that conversation, and treats their next message as new.
+- A member of a group direct message tells Bill-GN to forget the conversation: the whole
+  group conversation is removed, for all members, and Bill-GN's confirmation is visible to
+  the group.
+- A person asks Bill-GN to forget only part of a conversation (for example, "forget what I
+  said about the turbo"): Bill-GN explains it can only forget the whole conversation and asks
+  whether to do that.
+- A message that merely contains such words (for example, "I forget which gasket"): not
+  treated as a request to forget.
+- A person asks from a channel mention to forget their conversation: it applies to their
+  direct message conversation, and the confirmation is sent there.
 - Two follow-ups sent in quick succession in one conversation: both are answered, in the order they
   were sent, and the second takes the first into account.
 - Messages in a channel that do not mention Bill-GN, including the rest of a thread Bill-GN was
@@ -148,8 +167,19 @@ new.
   after that.
 - **FR-005**: When a follow-up arrives after the conversation has been removed, Bill-GN MUST answer
   it as a new conversation and MUST tell the person it no longer has the earlier discussion.
-- **FR-006**: When a conversation grows too long to use in full, Bill-GN MUST keep the most recent
-  exchanges in full and the main points of earlier ones, and MUST continue to answer.
+- **FR-006**: Bill-GN MUST bring the last 10 exchanges of a conversation to each new question
+  in full. When a conversation has more than 10 exchanges, Bill-GN MUST also bring a summary
+  of the main points of the older ones, and MUST continue to answer however long the
+  conversation grows. The number of exchanges kept in full MUST be adjustable by the project
+  owner.
+- **FR-016**: A person MUST be able to remove their own direct message conversation by telling
+  Bill-GN in plain words to forget it or start over. Bill-GN MUST confirm that it has done so,
+  MUST remove everything it remembered of that conversation, and MUST treat the person's next
+  message as a new conversation.
+- **FR-017**: In a group direct message, any member MUST be able to do the same for the whole
+  group conversation, and the confirmation MUST be visible to the group.
+- **FR-018**: Forgetting MUST apply to a whole conversation. Bill-GN MUST NOT claim to have
+  forgotten part of one. A request to forget MUST be recorded without its text.
 - **FR-007**: An operator MUST be able to remove a specific remembered conversation on
   request, following documented steps.
 - **FR-008**: Messages in one conversation MUST be handled in the order they were sent.
@@ -158,8 +188,11 @@ new.
   discussion, and the failure MUST be recorded.
 - **FR-010**: A remembered conversation MUST contain only the person's messages addressed to
   Bill-GN and Bill-GN's replies in that conversation.
-- **FR-011**: Remembered conversations MUST be stored so that only Bill-GN and authorized operators
-  can read them, and MUST be protected at rest.
+- **FR-011**: Remembered conversations MUST be protected at rest and usable only by Bill-GN.
+  Operators MUST be able to list conversations and remove them without seeing their content.
+  Reading the content of a conversation MUST require a deliberate, separate step that is
+  itself recorded (who read which conversation, and when), and MUST NOT be part of routine
+  operation.
 - **FR-012**: Bill-GN's persona, scope, honesty and safety rules (feature 001) MUST apply to every
   answer regardless of what earlier messages in the conversation said.
 - **FR-013**: Request records MUST identify the conversation a request belongs to without
@@ -200,6 +233,18 @@ new.
 - **SC-008**: A review of request records finds conversation identifiers and no message text.
 - **SC-009**: Adding memory adds no more than 5 seconds to the time taken to answer for 95%
   of questions, compared with feature 002.
+- **SC-010**: When a person tells Bill-GN to forget the conversation, in 100% of at least 10
+  trials Bill-GN confirms, and a follow-up that depends on the earlier exchange is answered
+  as a new conversation.
+- **SC-011**: On at least 10 messages that contain words like "forget" or "start over" without
+  being a request to forget, 0 conversations are removed.
+- **SC-012**: The documented steps for listing and removing conversations show no
+  conversation content, and every deliberate read of a conversation's content during testing
+  appears in the records with who read it and when.
+- **SC-013**: In a conversation of 30 exchanges, a follow-up that depends on a detail from
+  one of the last 10 exchanges is answered correctly in at least 90% of at least 10 trials,
+  and a follow-up that depends on the main point of an exchange older than that is answered
+  correctly in at least 70%.
 
 ## Assumptions
 
@@ -211,19 +256,25 @@ new.
   said earlier when answering another, as the members can all see those messages themselves.
 - A direct message conversation therefore has no natural end. It lasts until 30 days pass
   with no message, and long conversations are handled by keeping recent exchanges and the main
-  points of older ones (FR-006). A command for a person to reset it is out of scope.
+  points of older ones (FR-006), or until someone tells Bill-GN to forget it (FR-016).
 - Bill-GN does not remember anything across conversations: no per-person profile, no memory of the
   person's car, and no learning from past conversations. That would be a separate feature.
-- The retention period defaults to 30 days after the last message, chosen to cover a job
+- The retention period is 30 days after the last message (confirmed by the project owner,
+  2026-11-14), chosen to cover a job
   that spans a few weekends while limiting how long messages are kept.
 - Bill-GN remembers only what was addressed to it and what it replied. It does not read other
   messages in a channel.
 - A question a person asks from a channel is remembered in their direct message conversation
   like any other, including the text of the channel message that mentioned Bill-GN.
-- Removal on request is an operator task for the proof of concept. A way for people to clear
-  a conversation themselves from Slack is out of scope.
+- People remove their own conversations by telling Bill-GN (clarified 2026-11-14). Operators
+  keep the ability to remove any conversation (FR-007).
+- In a group direct message one member can remove the conversation for everyone. This is
+  accepted because every member can already see everything in it.
 - Slack remains the visible record of the conversation; removing Bill-GN's memory does not delete Slack
   messages.
+- An exchange is one message addressed to Bill-GN and its reply. Ten exchanges in full was
+  chosen by the project owner as the balance between recall and the cost of each follow-up;
+  details from older exchanges may be lost where the summary does not keep them.
 - Expected usage is low (a small team, tens of questions per day), with conversations
   typically under 20 turns.
 - Technology choices are fixed by the project constitution and are addressed in the plan, not
