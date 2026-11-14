@@ -254,8 +254,8 @@ confirm each is rejected, produces no reply and is recorded.
   be true. When a person exceeds it, Bill-GN MUST tell them once that they have reached the
   limit and when they can ask again, and MUST NOT answer their further questions until then.
 - **FR-024**: Bill-GN MUST enforce an overall daily limit on questions across all people
-  (default: 300 per day). The day is the calendar day in US Eastern time, and the count
-  resets at midnight Eastern, which is the time the notice gives. Once it is reached, Bill-GN MUST tell each person who asks, once,
+  (default: 300 per day). The day is the calendar day in UTC, and the count resets at
+  00:00 UTC, which is the time the notice gives. Once it is reached, Bill-GN MUST tell each person who asks, once,
   that it has reached its limit for the day and when it will be available again.
 - **FR-025**: Questions refused because of a limit MUST NOT be sent to the expert agent, and
   each refusal MUST be recorded. Both limits MUST be adjustable by the project owner without
@@ -369,8 +369,7 @@ confirm each is rejected, produces no reply and is recorded.
   delivery time.
 - Slack's response deadline and message size limit are those published by Slack at the time
   of planning.
-- The daily limit uses US Eastern time because the project and its users are based there;
-  this is a default the owner can change.
+- The daily limit uses UTC (project owner's decision, 2026-11-14).
 - The limit defaults (30 questions per person per hour, 300 per day overall) are starting
   values set well above expected use; they exist to cap runaway cost, not to ration normal
   use.
