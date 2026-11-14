@@ -2,10 +2,10 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: bill-gn
+  name: Bill-GN
   description: POC of a slack agent
   annotations:
-    github.com/project-slug: ServerlessOpsIO/bill-gn
+    github.com/project-slug: ServerlessOpsIO/Bill-GN
 spec:
   type: iac
   lifecycle: production
