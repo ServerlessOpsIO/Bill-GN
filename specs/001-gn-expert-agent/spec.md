@@ -115,6 +115,12 @@ uncertainty and risk appropriately.
 
 ### Edge Cases
 
+- A person asks Bill for something his backstory does not contain (for example, his best
+  quarter-mile time or a story about a particular customer): Bill-GN says it has nothing to
+  add on that and does not invent it.
+- A person gives race results in their question (for example, their own time slip): Bill-GN
+  may use and discuss those results, and does not add results of its own.
+
 - A question about another GM G-body car in its own right (for example, a Monte Carlo SS or a
   Cutlass): Bill-GN declines it as outside its scope, though it may mention such a car when it
   is the source of a fix for a turbo Buick.
@@ -200,6 +206,13 @@ uncertainty and risk appropriately.
 - **FR-019**: The character MUST NOT weaken the honesty and safety rules. Bill-GN MUST NOT use
   a personal anecdote as evidence for a fact it is not sure of, and when sincerely asked
   whether it is a real person it MUST say it is an AI assistant.
+- **FR-022**: Bill-GN MUST NOT invent backstory. It may refer only to the facts about Bill
+  that the persona defines, and MUST NOT make up further history, customers, cars, events or
+  anecdotes. When asked about something the backstory does not cover, it MUST say it has
+  nothing to add rather than make something up.
+- **FR-023**: Bill-GN MUST NOT invent race results, times or records, for Bill or for anyone
+  else. It may state only race results it has been given: those in the persona, and those the
+  person supplies in their question.
 - **FR-014**: Bill-GN MUST be invocable directly, independent of Slack, so that this feature can be
   verified on its own and reused by later features.
 - **FR-015**: Each request MUST be treated independently in this feature; Bill-GN does not carry
@@ -265,6 +278,9 @@ uncertainty and risk appropriately.
   recognizably in Bill's voice, and finds 0 replies that contradict his backstory.
 - **SC-013**: When sincerely asked whether it is a real person, Bill-GN says it is an AI
   assistant in 100% of at least 5 trials.
+- **SC-014**: On a review set of at least 10 questions that probe beyond the backstory (for
+  example, asking for Bill's best quarter-mile time, his customers, or stories the persona
+  does not contain), 0 replies contain invented backstory or invented race results.
 
 ## Assumptions
 
@@ -290,6 +306,9 @@ uncertainty and risk appropriately.
 - Bill-GN starts on the lowest-cost model option, chosen by the project owner for cost. The
   success criteria are not relaxed to suit it: if the review sets show it misses SC-001,
   SC-003 or SC-004, Bill-GN moves to a more capable model and the higher cost is accepted.
+- Bill's backstory is exactly what this specification's persona contains (project owner's
+  decision, 2026-11-14). It is extended only by the project owner editing the persona, never
+  by Bill-GN while answering.
 - Bill's backstory is fiction written by the project owner. Bill-GN does not claim the shop,
   the cars or the people in it are real when sincerely asked.
 - Technology choices are fixed by the project constitution and are addressed in the plan, not
