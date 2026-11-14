@@ -37,24 +37,25 @@ where they will reach for Bill-GN. Answering in a direct message keeps every con
 in one place and keeps channels free of long replies.
 
 **Independent Test**: In a channel Bill-GN has been added to, @-mention Bill-GN with a Grand National
-question and confirm nothing is posted in the channel, the message is marked as answered
-privately, and one answer arrives in the asker's direct message with Bill-GN.
+question and confirm nothing visible to other members is posted in the channel, the message
+carries Bill-GN's reaction, the asker sees the private note, and one answer arrives in the asker's direct message with Bill-GN.
 
 **Acceptance Scenarios**:
 
 1. **Given** Bill-GN is a member of a channel, **When** a person posts a message that @-mentions
    Bill-GN with a question, **Then** Bill-GN sends one answer to that person in their direct message
-   with Bill-GN and posts no message in the channel.
+   with Bill-GN and posts no message in the channel that other members can see.
 2. **Given** Bill-GN answers a channel mention in a direct message, **When** the person reads it,
    **Then** the direct message shows which question is being answered and links back to the
    message in the channel.
 3. **Given** a person @-mentions Bill-GN in a channel, **When** Bill-GN has received the question,
    **Then** within a few seconds the person's message in the channel carries a reaction from
    Bill-GN that everyone in the channel can see, and the asker sees a note, visible only to
-   them, saying the answer is in their direct message and linking to it.
+   them, saying Bill-GN is answering in their direct message and linking to it. The note does
+   not claim the answer has already arrived.
 4. **Given** a person @-mentions Bill-GN inside a thread in a channel, **When** Bill-GN answers,
    **Then** it behaves the same way: the answer goes to the person's direct message and
-   nothing is posted in the thread.
+   nothing visible to other members is posted in the thread.
 5. **Given** a message in a channel that does not @-mention Bill-GN, **When** it is posted,
    **Then** Bill-GN does not respond.
 6. **Given** a message that @-mentions Bill-GN with other text around the mention, **When** Bill-GN
@@ -207,7 +208,9 @@ confirm each is rejected, produces no reply and is recorded.
 
 - **FR-001**: Bill-GN MUST respond when a person @-mentions it in a channel it is a member of,
   whether in a top-level message or in a thread. The response MUST be sent to that person in
-  their direct message with Bill-GN, and Bill-GN MUST NOT post a message in the channel.
+  their direct message with Bill-GN, and Bill-GN MUST NOT post a message in the channel that
+  other members can see. The asker's private note (FR-019) is the only thing Bill-GN shows in
+  the channel besides its reaction.
 - **FR-002**: Bill-GN MUST respond when a person sends it a direct message, with no mention
   required. This applies equally to group direct messages that include Bill-GN: Bill-GN MUST respond to
   every message posted there by a person.
@@ -216,11 +219,14 @@ confirm each is rejected, produces no reply and is recorded.
   question it answers and MUST link back to the person's message in the channel.
 - **FR-019**: When Bill-GN responds to a channel mention, it MUST do both of the following in
   the channel, and nothing else: add a reaction to the person's message, visible to all
-  channel members; and show the asker a note, visible only to them, saying the answer is in
-  their direct message and linking to it. Bill-GN MUST NOT post a message that other channel
+  channel members; and show the asker a note, visible only to them, saying Bill-GN is
+  answering in their direct message and linking to it. Both MUST appear within 5 seconds of
+  the mention, before the answer is ready, so the note MUST NOT say the answer has arrived. Bill-GN MUST NOT post a message that other channel
   members can see.
 - **FR-004**: The response MUST be the answer produced by the Bill-GN expert agent (feature 001)
-  for the text of the person's message with any mention of Bill-GN removed.
+  for the text of the person's message with any mention of Bill-GN removed. Two kinds of
+  reply are exceptions and are produced by this feature without the expert agent: the request
+  to restate a channel question (FR-022) and the usage limit notices (FR-023, FR-024).
 - **FR-005**: The authenticity of every incoming request MUST be verified before any other
   processing. Requests that fail verification, or that fall outside the allowed time window,
   MUST be rejected, MUST NOT produce a reply, and MUST be recorded.
@@ -238,14 +244,18 @@ confirm each is rejected, produces no reply and is recorded.
   messages from people who belong to another organization (for example, in a channel shared
   with that organization): no answer, no direct message, no reaction and no note.
 - **FR-022**: For a channel mention, Bill-GN MUST use only the text of the message that
-  mentions it. It MUST NOT read other messages in the channel or thread. When that text is
-  not a question it can answer on its own, its direct message reply MUST ask the person to
+  mentions it. It MUST NOT read other messages in the channel or thread. When that text
+  refers to something outside itself that it does not contain (for example, "what do you
+  think?" or "is that right?"), its direct message reply MUST ask the person to
   restate the full question there.
 - **FR-023**: Bill-GN MUST enforce a per-person limit on questions (default: 30 per person per
-  hour). When a person exceeds it, Bill-GN MUST tell them once that they have reached the
+  hour). The hour is a rolling window: a person may ask when fewer than 30 of their questions
+  fall within the previous 60 minutes, and the notice gives the time at which that will next
+  be true. When a person exceeds it, Bill-GN MUST tell them once that they have reached the
   limit and when they can ask again, and MUST NOT answer their further questions until then.
 - **FR-024**: Bill-GN MUST enforce an overall daily limit on questions across all people
-  (default: 300 per day). Once it is reached, Bill-GN MUST tell each person who asks, once,
+  (default: 300 per day). The day is the calendar day in UTC, and the count resets at
+  00:00 UTC, which is the time the notice gives. Once it is reached, Bill-GN MUST tell each person who asks, once,
   that it has reached its limit for the day and when it will be available again.
 - **FR-025**: Questions refused because of a limit MUST NOT be sent to the expert agent, and
   each refusal MUST be recorded. Both limits MUST be adjustable by the project owner without
@@ -292,7 +302,7 @@ confirm each is rejected, produces no reply and is recorded.
 
 - **SC-001**: Across at least 20 test questions split between channel mentions and direct
   messages, 100% receive exactly one reply in the correct direct message conversation, and Bill-GN
-  posts 0 messages in any channel.
+  posts 0 messages that other members can see in any channel.
 - **SC-012**: For 100% of channel mentions in that set, the person's message carries Bill-GN's
   reaction, the asker sees the private note with a working link to the direct message, other
   channel members see no note, and the reply links back to the channel message.
@@ -359,6 +369,7 @@ confirm each is rejected, produces no reply and is recorded.
   delivery time.
 - Slack's response deadline and message size limit are those published by Slack at the time
   of planning.
+- The daily limit uses UTC (project owner's decision, 2026-11-14).
 - The limit defaults (30 questions per person per hour, 300 per day overall) are starting
   values set well above expected use; they exist to cap runaway cost, not to ration normal
   use.
