@@ -128,7 +128,8 @@ new.
   message in it.
 - **FR-002**: In a channel, a conversation MUST be one thread. In a direct message, the
   conversation MUST be the whole direct message between that person and GN, with no thread
-  required. Different conversations MUST NOT share any context, including a channel thread
+  required. A group direct message that includes GN MUST likewise be one conversation, shared
+  by all its members. Different conversations MUST NOT share any context, including a channel thread
   and a direct message belonging to the same person.
 - **FR-003**: A conversation MUST remain available for follow-ups for 30 days after the last
   message in it, regardless of how long the pause between messages is within that period.
@@ -195,6 +196,8 @@ new.
 - In a channel a conversation is a thread. In a direct message the conversation is the whole
   direct message, because direct messages do not use threads (project owner's decision,
   2026-11-14, see feature 002).
+- A group direct message is one conversation shared by its members: GN uses what any member
+  said earlier when answering another, as the members can all see those messages themselves.
 - A direct message conversation therefore has no natural end. It lasts until 30 days pass
   with no message, and long conversations are handled by keeping recent exchanges and the main
   points of older ones (FR-006). A command for a person to reset it is out of scope.

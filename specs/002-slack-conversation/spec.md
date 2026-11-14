@@ -62,6 +62,9 @@ thread.
    sent, and each question is treated as standalone.
 3. **Given** a person sends a direct message, **When** GN has received it, **Then** the person
    sees the same working-on-it indication as in a channel.
+4. **Given** a group direct message that includes GN, **When** any member posts a question
+   without mentioning GN, **Then** GN posts one answer as a message in that group
+   conversation, not in a thread.
 
 ---
 
@@ -137,8 +140,9 @@ confirm each is rejected, produces no reply and is recorded.
   conversation, as for any other direct message.
 - Two questions sent in a direct message before GN has answered the first: both are answered,
   in the order they were sent.
-- A group direct message that includes GN and several people: treated like a channel. GN
-  responds only when @-mentioned and replies in a thread.
+- A group direct message that includes GN and several people: treated like a one-to-one
+  direct message. GN answers every message any member posts there, with no mention needed,
+  and replies in the conversation without a thread.
 - Many questions arriving at once: each is answered; none is dropped. Answers may take
   longer.
 - GN takes much longer than usual: the working-on-it indication remains until an answer or a
@@ -153,7 +157,8 @@ confirm each is rejected, produces no reply and is recorded.
 
 - **FR-001**: GN MUST respond when a person @-mentions it in a channel it is a member of.
 - **FR-002**: GN MUST respond when a person sends it a direct message, with no mention
-  required.
+  required. This applies equally to group direct messages that include GN: GN MUST respond to
+  every message posted there by a person.
 - **FR-003**: In a channel, GN MUST post its response as a reply in a thread: under the
   person's message when that message is top-level, or in the existing thread when the message
   is already in one. In a direct message, GN MUST post its response as an ordinary message in
@@ -241,6 +246,10 @@ confirm each is rejected, produces no reply and is recorded.
   scope.
 - Conversation memory is out of scope. A follow-up in a channel thread or in a direct message
   is answered as a standalone question until feature 003.
+- Group direct messages behave like one-to-one direct messages (project owner's decision,
+  2026-11-14): no mention is needed and no thread is used. Adding GN to a group direct message
+  therefore means GN reads and answers everything posted there, including messages members
+  address to each other.
 - Direct messages do not use threads (project owner's decision, 2026-11-14): a direct message
   with GN reads as one continuous back-and-forth. Feature 003 treats the whole direct message
   as one conversation and each channel thread as one conversation.
