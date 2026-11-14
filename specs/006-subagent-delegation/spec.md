@@ -216,10 +216,15 @@ which specialists handled each question.
   given without delegation, have the two answers compared, and record a verdict: the
   delegated answer was better than, the same as, or worse than the single-agent answer. The
   person MUST receive only the delegated answer, and the comparison MUST NOT delay it.
-- **FR-021**: The shadow comparison MUST have its own on or off setting among the project's
-  deployment parameters, separate from the delegation setting, and a sampling rate that sets
-  the share of delegated questions compared. It MUST be off by default. The sampling rate
-  defaults to 100%.
+- **FR-021**: The shadow comparison MUST be controlled by two values among the project's
+  deployment parameters (the `cfn-parameters.json` file, passed to the deployed stack),
+  separate from the delegation setting: an on or off setting, off by default; and a sampling
+  rate, the percentage of delegated questions that are compared, defaulting to 100. Changing
+  either MUST NOT require changing Bill-GN's other behavior.
+- **FR-024**: The single-agent answer produced for comparison MUST be produced the way Bill-GN
+  would have answered the question alone, including consulting the reference collection and
+  making its own live lookups, under its own limit of 6 lookups. Those lookups are counted
+  separately from the delegated answer's and are recorded as belonging to the comparison.
 - **FR-022**: Each verdict MUST be recorded with the request's correlation identifier and the
   specialists consulted, and counted so that the share of delegated answers judged worse can
   be seen over time. The record MUST NOT contain question text, either answer's text, or the
@@ -269,7 +274,8 @@ which specialists handled each question.
   across feature 001's representative review set, with and without delegation, are recorded.
 - **SC-011**: With delegation turned off, Bill-GN's answers and timings match its behavior before
   this feature.
-- **SC-012**: Across all testing, no delegated question makes more than 6 lookups in total.
+- **SC-012**: Across all testing, no delegated answer makes more than 6 lookups in total, and
+  no comparison answer makes more than 6 of its own.
 - **SC-013**: 100% of occasions on which the lookup limit is reached during testing appear in
   the records, each showing who was refused and how many lookups each participant had used.
 - **SC-014**: Across all delegated replies in testing, 0 mention specialists, delegation or
@@ -281,6 +287,8 @@ which specialists handled each question.
   text and no reasoning text.
 - **SC-017**: With the shadow comparison off, 0 single-agent answers are produced for
   delegated questions.
+- **SC-018**: With the sampling rate set to 50, between 35% and 65% of at least 40 delegated
+  test questions are compared; set to 0, none are; set to 100, all are.
 
 ## Assumptions
 
@@ -322,8 +330,10 @@ which specialists handled each question.
   second answer plus the comparison. The on or off setting and the sampling rate are the
   controls. While the project owner is the only user, comparing every delegated question is
   affordable.
-- The single-agent answer produced for comparison may use the reference collection but makes
-  no live lookups of its own, so that a comparison does not double the load on outside sites.
+- The comparison is like for like: the single-agent answer does its own lookups (project
+  owner's decision, 2026-11-14). A compared question can therefore make up to 12 lookups in
+  total, 6 for each answer, which doubles the visits to outside sites for that question. The
+  sampling rate is the control on this.
 - This feature works without features 002 to 005, but is expected to add the most value once
   specialists can draw on reference material and lookups.
 - Expected usage is low (a small team, tens of questions per day).
