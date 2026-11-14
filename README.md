@@ -1,4 +1,4 @@
-# Slack AI Agent / Bill-GN
+# Slack AI Agent / bill-gn
 
 POC of a slack agent
 
