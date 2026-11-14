@@ -8,6 +8,16 @@
 
 **Input**: User description: "Subagent delegation: GN acts as an orchestrator that hands parts of a question to specialist subagents, each an expert in one area of the Grand National (for example engine and turbo, electrical and engine management, drivetrain and chassis, body and interior, buying and history), and combines their findings into one answer in GN's voice. The person still talks to one GN and gets one reply. Simple questions are answered without delegation. Covers questions that span several specialties, a specialist failing or being slow, limits on how much work one question may trigger, and keeping GN's scope, honesty and safety rules across all specialists. Depends on feature 001 and is more useful after features 004 and 005."
 
+## Clarifications
+
+### Session 2026-11-14
+
+- Q: What is delegating to specialists for in this project: to make Bill-GN's answers better, or to prove out the multi-agent pattern? → A: To prove the pattern. It is built to show that orchestrating specialists works reliably within limits. Answer quality is measured and reported but is not a pass or fail condition. Comparing multiple agents with a single agent on performance, accuracy and cost is a separate research follow-up.
+- Q: How should the specialists be divided? → A: Three, by area of the car: engine, turbo and fuel; electrical and engine management; drivetrain, chassis and brakes. Everything else Bill-GN answers itself.
+- Q: When a specialist needs outside information, should it be able to use the reference collection and live lookups itself? → A: Both, sharing one limit. Specialists can use the reference collection and perform lookups, and all lookups for one question, by anyone, count against a single limit of six. Each time the limit is reached it is recorded, so the limit or the approach can be adjusted. How well this works is evaluated after real usage; if it works poorly, the fallback is that only Bill-GN performs lookups.
+- Q: When Bill-GN has consulted its specialists, should the person be told? → A: No. The reply reads as Bill's own answer, with no mention of specialists. Only the records show that delegation happened.
+- Q: Once delegation is built and proven, should it be switched on or off in everyday use? → A: Off. The feature ships proven and tested but switched off. Whether to switch it on is evaluated as part of the research into multiple agents against a single agent.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Get a deeper answer to a question that spans specialties (Priority: P1)
@@ -118,6 +128,17 @@ which specialists handled each question.
 
 ### Edge Cases
 
+- The shadow comparison is on but delegation is off: nothing is compared, because no question
+  is delegated.
+- The shadow comparison fails or is slow: the person's reply is unaffected; the failure is
+  recorded and no verdict is counted for that question.
+- A question Bill-GN chose not to delegate: not compared.
+
+- One specialist uses all six lookups before the others have made any: the others answer
+  without lookups; the event is recorded, showing which specialist used them.
+- The lookup limit is reached while a specialist is part-way through its work: it stops
+  looking things up, answers with what it has, and says what it could not check.
+
 - A question that fits no specialty but is in Bill-GN's scope: Bill-GN answers it directly.
 - A specialist wants to hand work to another specialist: not permitted; only Bill-GN delegates.
 - Specialists repeat each other: the final answer states each point once.
@@ -125,10 +146,12 @@ which specialists handled each question.
   matters most and offers more detail on request.
 - A follow-up in a remembered conversation (feature 003): Bill-GN decides on delegation for each
   message; specialists receive the context they need from Bill-GN.
-- A specialist needs reference material or a lookup (features 004 and 005): it uses the same
-  material and approved tools as Bill-GN, under the same rules and limits.
-- A person asks Bill-GN to "ask the engine specialist": Bill-GN treats it as an ordinary question and
-  decides for itself whether to delegate.
+- A specialist needs reference material or a lookup (features 004 and 005): it uses them
+  itself, under the same rules as Bill-GN and the shared lookup limit (FR-017).
+- A person asks Bill-GN to "ask the engine specialist", or asks whether it uses specialists:
+  Bill-GN treats the first as an ordinary question, deciding for itself whether to delegate,
+  and answers the second honestly and briefly as the AI assistant it is (feature 001,
+  FR-019), without presenting specialists as people.
 - A person tries to address or redirect a specialist directly: not possible; people interact
   only with Bill-GN.
 - Many delegated questions arrive at once: each is answered; none is dropped.
@@ -139,8 +162,10 @@ which specialists handled each question.
 
 - **FR-001**: Bill-GN MUST be able to hand part or all of a question to one or more specialists
   and MUST combine what they return into a single answer.
-- **FR-002**: There MUST be a defined set of specialists that together cover Bill-GN's scope, each
-  with a stated area of expertise.
+- **FR-002**: There MUST be three specialists, each with a stated area of expertise: engine,
+  turbo and fuel; electrical and engine management; and drivetrain, chassis and brakes.
+  Questions outside those areas (for example body and interior, buying, history and values)
+  MUST be answered by Bill-GN itself without delegation.
 - **FR-003**: The person MUST interact only with Bill-GN and MUST receive exactly one reply per
   question. Specialists' intermediate output MUST NOT be shown to the person.
 - **FR-004**: The reply MUST be a single coherent answer in Bill-GN's voice that follows feature
@@ -160,16 +185,52 @@ which specialists handled each question.
 - **FR-011**: The work one question may trigger MUST be limited: a maximum number of
   specialist consultations per question, and no delegation by specialists.
 - **FR-012**: If no specialist can be used, Bill-GN MUST answer as it does in feature 001.
-- **FR-013**: Specialists MUST use only the reference material (feature 004) and approved
-  tools (feature 005) available to Bill-GN, under the same rules and limits, where those features
-  are in place.
+- **FR-013**: Specialists MUST be able to consult the reference collection (feature 004) and
+  perform live lookups (feature 005) themselves, where those features are in place, under the
+  same rules as Bill-GN.
+- **FR-017**: All lookups made for one question, by Bill-GN and by every specialist together,
+  MUST count against a single limit of 6 lookups, the same limit that applies to a question
+  Bill-GN answers alone (feature 005, FR-009). Once it is reached, no further lookup is made
+  for that question, and whoever needed one answers with what it has.
+- **FR-018**: Each time the lookup limit is reached, that MUST be recorded with the request's
+  correlation identifier, who was refused a lookup (Bill-GN or which specialist), and how many
+  lookups each had used, without recording question text. The limit MUST be adjustable by the
+  project owner.
+- **FR-019**: A reply MUST NOT mention specialists, delegation or other agents, and MUST NOT
+  describe colleagues, staff or helpers, which would be invented backstory (feature 001,
+  FR-022). When an area could not be covered in depth (FR-010), Bill-GN MUST say so in Bill's
+  own voice, as something he could not go into fully, without saying why in terms of
+  specialists.
 - **FR-014**: Each consultation MUST be recorded with the specialist, its outcome and its
   duration, linked to the request's correlation identifier, without recording question or
   answer text.
 - **FR-015**: The project owner MUST be able to add, change or remove a specialist by
   documented steps.
-- **FR-016**: Delegation MUST be able to be turned off, returning Bill-GN to its behavior without
-  specialists.
+- **FR-016**: Delegation MUST be controlled by a single on or off setting among the project's
+  deployment parameters (the `cfn-parameters.json` file, passed to the deployed stack), so
+  that the project owner switches it by changing that value and deploying. It MUST be off by
+  default, and with it off Bill-GN behaves exactly as it did before this feature. The
+  feature's tests are run with it switched on.
+- **FR-020**: Bill-GN MUST support a shadow comparison for delegated questions. When it is on
+  and a delegated question is selected, Bill-GN MUST also produce the answer it would have
+  given without delegation, have the two answers compared, and record a verdict: the
+  delegated answer was better than, the same as, or worse than the single-agent answer. The
+  person MUST receive only the delegated answer, and the comparison MUST NOT delay it.
+- **FR-021**: The shadow comparison MUST be controlled by two values among the project's
+  deployment parameters (the `cfn-parameters.json` file, passed to the deployed stack),
+  separate from the delegation setting: an on or off setting, off by default; and a sampling
+  rate, the percentage of delegated questions that are compared, defaulting to 100. Changing
+  either MUST NOT require changing Bill-GN's other behavior.
+- **FR-024**: The single-agent answer produced for comparison MUST be produced the way Bill-GN
+  would have answered the question alone, including consulting the reference collection and
+  making its own live lookups, under its own limit of 6 lookups. Those lookups are counted
+  separately from the delegated answer's and are recorded as belonging to the comparison.
+- **FR-022**: Each verdict MUST be recorded with the request's correlation identifier and the
+  specialists consulted, and counted so that the share of delegated answers judged worse can
+  be seen over time. The record MUST NOT contain question text, either answer's text, or the
+  comparison's reasoning.
+- **FR-023**: A failure of the shadow comparison MUST NOT affect the reply to the person, and
+  MUST be recorded.
 
 ### Key Entities
 
@@ -179,6 +240,9 @@ which specialists handled each question.
   area of expertise, and the rules it follows.
 - **Consultation**: One hand-off of work from Bill-GN to a specialist. Attributes: the specialist,
   what was asked, what was returned, the outcome, the duration, and the request it belongs to.
+- **Shadow comparison**: For one delegated question, the single-agent answer produced behind
+  the scenes and the verdict from comparing it with the delegated answer. Only the verdict is
+  kept.
 - **Delegation limits**: The maximum number of consultations per question and the time
   allowance per specialist.
 
@@ -186,17 +250,18 @@ which specialists handled each question.
 
 ### Measurable Outcomes
 
-- **SC-001**: On a review set of at least 15 cross-specialty questions, a knowledgeable
-  reviewer comparing answers with and without delegation, without knowing which is which,
-  judges the delegated answer more complete or more correct for at least 60% and worse for no
-  more than 10%.
-- **SC-002**: On the same set, at least 90% of delegated answers address every area the
-  reviewer considers relevant.
+- **SC-001**: Reported, not pass or fail: on a review set of at least 15 cross-specialty
+  questions, a knowledgeable reviewer compares answers with and without delegation, without
+  knowing which is which, and the share judged better, the same and worse is recorded.
+- **SC-002**: On the same set, 100% of delegated questions return exactly one reply that
+  combines the specialists' contributions, with no specialist's raw output shown. The share
+  of answers that address every area the reviewer considers relevant is recorded.
 - **SC-003**: On feature 001's representative review set, at least 70% of questions are
   answered without delegation.
 - **SC-004**: 95% of questions answered without delegation meet feature 001's time limit.
-- **SC-005**: 95% of delegated questions are answered within 60 seconds, and none takes longer
-  than 120 seconds.
+- **SC-005**: Soft target: 95% of delegated questions are answered within 60 seconds, and
+  none takes longer than 120 seconds. The measured figures are reported; missing them does
+  not fail the feature.
 - **SC-006**: With each specialist made unavailable in turn, 100% of questions receive exactly
   one answer, and each affected answer states which area was not covered in depth.
 - **SC-007**: No question triggers more consultations than the defined maximum, across all
@@ -205,25 +270,70 @@ which specialists handled each question.
   work (SC-002, SC-003, SC-004) still pass with delegation in place.
 - **SC-009**: 100% of consultations made during testing can be found in the records with
   specialist, outcome and duration.
-- **SC-010**: The average running cost per question across feature 001's representative
-  review set is no more than twice its cost without delegation.
+- **SC-010**: Reported, not pass or fail: the average running cost and time per question
+  across feature 001's representative review set, with and without delegation, are recorded.
 - **SC-011**: With delegation turned off, Bill-GN's answers and timings match its behavior before
   this feature.
+- **SC-012**: Across all testing, no delegated answer makes more than 6 lookups in total, and
+  no comparison answer makes more than 6 of its own.
+- **SC-013**: 100% of occasions on which the lookup limit is reached during testing appear in
+  the records, each showing who was refused and how many lookups each participant had used.
+- **SC-014**: Across all delegated replies in testing, 0 mention specialists, delegation or
+  other agents, and 0 describe colleagues or helpers.
+- **SC-015**: With the shadow comparison on at a 100% sampling rate, 100% of delegated
+  questions in testing have a recorded verdict or a recorded comparison failure, and the
+  person's reply arrives no later than it does with the comparison off.
+- **SC-016**: A review of the shadow comparison's records finds no question text, no answer
+  text and no reasoning text.
+- **SC-017**: With the shadow comparison off, 0 single-agent answers are produced for
+  delegated questions.
+- **SC-018**: With the sampling rate set to 50, between 35% and 65% of at least 40 delegated
+  test questions are compared; set to 0, none are; set to 100, all are.
 
 ## Assumptions
 
-- The initial specialists are: engine and turbo; electrical and engine management; drivetrain
-  and chassis (transmission, rear axle, suspension, brakes); body and interior; and buying,
-  history and values. The exact set is an open question for the clarify phase.
+- The three specialists were chosen by the project owner (2026-11-14) as enough to prove
+  orchestration, including questions that span two or three of them, without more sets of
+  instructions to maintain. Others can be added later (FR-015).
 - Specialists differ in their focus and depth of instruction, not in what they are allowed to
   do. They are not separate products and are never addressed directly by people.
-- Whether delegation is worth its extra time and cost for this project is unproven; SC-001 and
-  SC-010 are the test, and the ability to turn it off (FR-016) is the fallback.
+- The purpose of this feature is to prove that orchestrating specialists works reliably
+  within limits (project owner's decision, 2026-11-14). It does not have to produce better
+  answers than the single agent to be accepted. The quality, cost and time comparisons are
+  recorded so that the separate research into multiple agents against a single agent has data
+  to start from.
+- Delegation is delivered switched off (project owner's decision, 2026-11-14). Whether to
+  switch it on in everyday use is decided as part of the research into multiple agents
+  against a single agent, using the comparisons this feature records.
 - The defaults are a maximum of 3 consultations per question and about 20 seconds per
   specialist; these may be adjusted during planning.
 - Where the Slack features are in place, their time targets are extended for delegated
   questions to the limits in this specification, and the working-on-it indication covers the
   wait.
+- Six shared lookups per question is a starting value chosen by the project owner.
+  It is to be evaluated after the service has real usage, using the records of when the limit
+  is reached. If sharing a limit among specialists works poorly in practice, the fallback is
+  for only Bill-GN to perform lookups and pass results to the specialists.
+- The limit of 6 lookups is the same whether or not a question is delegated (project owner's
+  decision, 2026-11-14); feature 005 was updated to match.
+- The time figures in this specification (about 20 seconds per specialist, and the figures in
+  SC-005) are soft targets, as in feature 005: measured and reported, and a miss does not
+  fail the feature. The limits on the number of consultations and lookups remain firm.
+- One specialist using all of the shared lookups before the others is accepted for now. It is
+  recorded when it happens (FR-018) and reviewed in the follow-up research.
+- The shadow comparison (requested by the project owner, 2026-11-14) exists so that a
+  delegated answer that is worse than the single agent's is noticed and counted. Its verdicts
+  come from a model comparing two answers, which can be wrong, especially about exact
+  figures; they show a trend and are not proof. They supplement the blind review in SC-001
+  and feed the research into multiple agents against a single agent.
+- A compared question costs roughly three times as much as a delegated question alone: the
+  second answer plus the comparison. The on or off setting and the sampling rate are the
+  controls. While the project owner is the only user, comparing every delegated question is
+  affordable.
+- The comparison is like for like: the single-agent answer does its own lookups (project
+  owner's decision, 2026-11-14). A compared question can therefore make up to 12 lookups in
+  total, 6 for each answer, which doubles the visits to outside sites for that question. The
+  sampling rate is the control on this.
 - This feature works without features 002 to 005, but is expected to add the most value once
   specialists can draw on reference material and lookups.
 - Expected usage is low (a small team, tens of questions per day).
