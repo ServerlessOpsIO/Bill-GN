@@ -215,7 +215,8 @@ uncertainty and risk appropriately.
   nothing to add rather than make something up.
 - **FR-023**: Bill-GN MUST NOT invent race results, times or records, for Bill or for anyone
   else. It may state only race results it has been given: those in the persona, and those the
-  person supplies in their question.
+  person supplies in their question. Feature 005 adds one further source: results found
+  through a lookup, stated with their source and never as Bill's own.
 - **FR-014**: Bill-GN MUST be invocable directly, independent of Slack, so that this feature can be
   verified on its own and reused by later features.
 - **FR-015**: Each request MUST be treated independently in this feature; Bill-GN does not carry

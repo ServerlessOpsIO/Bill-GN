@@ -8,6 +8,16 @@
 
 **Input**: User description: "External tools: Let GN use a small, approved set of external tools (provided by MCP servers) to look up information it cannot know on its own, such as current parts availability and prices or recent web information about the Grand National, and use the results in its answers. GN says when an answer used an outside lookup and names where the information came from. Only tools the project owner has approved can be used; tools are read-only lookups; credentials for outside services are handled securely; content returned by tools is treated as information and never as instructions; GN still answers when a tool is slow or unavailable. Depends on feature 001."
 
+## Clarifications
+
+### Session 2026-11-14
+
+- Q: What should Bill-GN be allowed to look up live while answering a question? → A: Approved sites first, with the open web as a fallback. Bill-GN searches the sites the owner has approved and widens to the open web only when they return nothing useful, saying so when it does. Curating sources over time (reviewing what is found online, adding documentation to the reference collection, adding sites to the approved list) is noted as a later feature and is not built now.
+- Q: Who should be able to trigger a live lookup? → A: Anyone who can use Bill-GN. Bill-GN decides when a question needs a lookup, and the existing per-person and daily limits (feature 002) are the only control.
+- Q: When Bill-GN finds race results, times or records on the web, may it state them? → A: Yes, naming where it found them, but never about Bill. Results for Bill himself come only from the persona.
+- Q: When someone asks where to buy a part or what it costs, how far should Bill-GN go? → A: Sellers and prices, without endorsement. Bill-GN names the sellers it finds and the prices listed, with links, says the prices are as of the lookup and may change, and says it is not recommending one seller over another.
+- Q: When something Bill-GN finds in a live lookup disagrees with what it already has in the reference collection, which should it go with? → A: The reference collection always leads. Bill-GN answers from the reference as feature 004 sets out, and may add what it found live, clearly marked as not vetted, noting the disagreement.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Get current information Bill-GN could not otherwise know (Priority: P1)
@@ -119,10 +129,22 @@ it; review the records and confirm each lookup made during testing can be found.
 
 ### Edge Cases
 
+- A lookup returns race results that name Bill or his shop: Bill-GN does not state them as
+  his. It may say that it only talks about its own results from what it has been told.
+- A lookup returns conflicting results for the same car or event: Bill-GN reports them with
+  their sources and says they disagree.
+
+- The approved sites have something on the subject but it is thin or old: Bill-GN uses what
+  they have and does not widen to the open web unless they offer nothing useful.
+- An approved site is unreachable: treated as returning nothing; Bill-GN may fall back to the
+  open web and says so.
+- The open web returns a page from an approved site: treated as an approved source.
+
 - Different sources give conflicting information: Bill-GN reports both, names both sources and
   says they disagree.
-- Looked-up information conflicts with the reference material (feature 004) on a factory
-  specification: the reference material takes precedence, and Bill-GN may note the discrepancy.
+- Looked-up information conflicts with the reference collection (feature 004), on any
+  subject: the reference leads; Bill-GN may add the looked-up information marked as not
+  vetted and notes the discrepancy.
 - A question would need many lookups: Bill-GN stops at a defined maximum per question and answers
   with what it has.
 - A tool returns a very large result: Bill-GN uses what is relevant; the answer stays within
@@ -145,6 +167,30 @@ it; review the records and confirm each lookup made during testing can be found.
 - **FR-002**: Bill-GN MUST be able to use only tools the project owner has explicitly approved.
   The approved set MUST be defined in the project's configuration, and a tool not in it MUST
   be unusable.
+- **FR-018**: Bill-GN MUST look first in the approved site list: the sites the project owner
+  has approved as sources. It MUST widen a lookup to the open web only when the approved sites
+  return nothing useful for the question.
+- **FR-019**: When an answer uses information found on the open web and not on an approved
+  site, Bill-GN MUST say so, in addition to naming the source.
+- **FR-020**: The approved site list MUST be defined in the project's configuration and
+  changed only by the project owner, by documented steps. It starts with the community sites
+  named in Assumptions and the vendor sites the owner adds.
+- **FR-021**: For each lookup that used the open web, the site the information came from MUST
+  be recorded (the site's address only, not the page content or the question), so that the
+  owner can later review which outside sites Bill-GN has been relying on.
+- **FR-022**: Lookups MUST be available to everyone who may use Bill-GN, with no separate
+  permission and no separate lookup limit. The usage limits of feature 002 apply to the
+  question as a whole.
+- **FR-023**: Bill-GN MAY state race results, times and records it finds through a lookup,
+  for cars and people other than Bill, and MUST name the source for each. It MUST NOT state a
+  looked-up result as Bill's own, and MUST NOT adopt one into Bill's backstory. Results for
+  Bill come only from the persona (feature 001, FR-022 and FR-023).
+- **FR-024**: When asked where to buy a part or what it costs, Bill-GN MAY name the sellers it
+  finds and the prices they list, with a link to each. Such an answer MUST say that prices
+  are as of the lookup and may change, and MUST say that Bill-GN is not recommending one
+  seller over another.
+- **FR-025**: Bill-GN MUST NOT present a seller or a price as Bill's recommendation, and MUST
+  NOT state a preference between sellers.
 - **FR-003**: Approved tools MUST be limited to looking up information. Bill-GN MUST NOT be able
   to change, create, purchase, send or delete anything in an outside system.
 - **FR-004**: When an answer uses looked-up information, Bill-GN MUST say so and MUST name the
@@ -172,8 +218,10 @@ it; review the records and confirm each lookup made during testing can be found.
 - **FR-015**: Bill-GN's persona, honesty and safety rules (feature 001) MUST apply to answers that
   use looked-up information, and Bill-GN MUST NOT repeat abusive, unlawful or unsafe content from a
   tool.
-- **FR-016**: For factory specifications and procedures, the reference material (feature 004),
-  where present, MUST take precedence over looked-up information.
+- **FR-016**: Where the reference collection (feature 004) has an item on the subject, it MUST
+  lead the answer, in the order feature 004 sets out. Bill-GN MAY add what a lookup found,
+  MUST mark it as not vetted, and MUST say so where it disagrees with the reference. A lookup
+  result MUST NOT replace or override a reference item.
 - **FR-017**: This feature MUST be delivered with at least one approved tool that demonstrates
   the success criteria.
 
@@ -200,8 +248,9 @@ it; review the records and confirm each lookup made during testing can be found.
   performs a lookup for no more than 20% of them.
 - **SC-004**: With each tool made unavailable in turn, 100% of questions still receive an
   answer, and each such answer states the lookup could not be completed.
-- **SC-005**: 95% of questions that use a lookup are answered within 45 seconds, and no
-  question takes longer than 90 seconds.
+- **SC-005**: Soft target: 95% of questions that use a lookup are answered within 45 seconds,
+  and none takes longer than 90 seconds. The measured figures are reported; missing them does
+  not fail the feature.
 - **SC-006**: On a test set of at least 10 tool results containing embedded instructions, Bill-GN
   follows none of them.
 - **SC-007**: On feature 001's set of unrelated requests, Bill-GN performs 0 lookups and still
@@ -213,22 +262,59 @@ it; review the records and confirm each lookup made during testing can be found.
   steps, after which Bill-GN makes 0 further uses of it.
 - **SC-011**: Feature 001's success criteria for relevance, exact figures and safety warnings
   still pass with this feature in place.
+- **SC-012**: On a review set of at least 10 questions that the approved sites can answer,
+  Bill-GN uses the open web for no more than 10% of them.
+- **SC-013**: 100% of answers that use information from outside the approved sites say so.
+- **SC-014**: 100% of open-web lookups made during testing appear in the records with the
+  site they drew on, and those records contain no page content and no question text.
+- **SC-015**: On at least 5 questions answered with looked-up race results, 100% name the
+  source of each result, and across at least 5 questions that try to draw out results for
+  Bill, 0 answers present a looked-up result as his.
+- **SC-016**: On at least 5 questions about where to buy a part or its cost, 100% of answers
+  that name a seller or price include the as-of-lookup caveat and the no-recommendation
+  statement, and none states a preference between sellers.
+- **SC-017**: On at least 5 questions where a lookup result disagrees with a reference item,
+  100% of answers lead with the reference item, and any looked-up information included is
+  marked as not vetted.
 
 ## Assumptions
 
-- The first approved tool is a web search limited to looking up public information, which
-  covers parts availability, prices, recalls, events and recent discussion without needing an
-  account with any parts supplier. Which tools to approve is the main open question for the
-  clarify phase.
+- For now, Bill-GN looks things up with the hosting platform's managed web browser (project
+  owner's decision, 2026-11-14): it visits the approved sites and uses their own search and
+  pages, and falls back to the open web the same way. No separate search service is used.
+  The owner expects there are useful sources they do not yet know of, which is why the open
+  web is allowed as a fallback.
+- Building dedicated tools for individual approved sites (for example, one that uses a
+  forum's own programming interface) is to be researched later and is not part of this
+  feature. It is tracked as a follow-up.
+- The approved site list starts with: turbobuick.com, gbodyforum.com, turbobuicks.com,
+  gnttype.org, and the Buick Grand National and GNX forum on buickforums.com, plus the sites
+  of vendors of third-party parts as the owner names them.
+- Source curation is out of scope and left for a later feature (project owner's decision,
+  2026-11-14). That later feature would cover periodically reviewing sources; reviewing
+  documentation found online and adding it to the reference collection (feature 004); and
+  reviewing sites found through web searches and possibly adding them to the approved site
+  list. This feature only keeps the record (FR-021) that such a review would start from.
 - A dedicated parts-catalog or pricing service may be added later through the same mechanism
   if a suitable one with a usable interface is identified.
 - The approved set is small, on the order of one to three tools.
-- Tools are provided by outside services through a standard tool protocol named in the
-  project's technical direction; the choice of services is made during planning.
-- Outside services may charge per use. At the expected usage (a small team, tens of questions
-  per day) this is assumed to be low; the per-question lookup limit also bounds it.
-- The defaults for the time allowance per lookup (about 10 seconds) and the maximum lookups
-  per question (3) may be adjusted during planning.
+- The managed browser is treated as one approved tool. Further tools, whether dedicated
+  per-site tools or a search service, may be added later through the same approval steps
+  (FR-014).
+- The managed browser is charged for the time and resources it uses, and the model is charged
+  for reading the pages it brings back. Reading pages is expected to be the larger cost. The
+  per-question lookup limit and feature 002's usage limits bound both.
+- The time figures in this specification (about 10 seconds per lookup, the 45 and 90 second
+  figures in SC-005) are soft targets for now (project owner's decision, 2026-11-14). They are
+  measured and reported, and a miss does not fail the feature. The maximum of 3 lookups per
+  question remains a firm limit.
+- Whether each approved site lets an automated browser in is not known and will be found out
+  during development. A site that cannot be reached this way is treated as returning nothing
+  (FR-010) and is noted for the follow-up research on dedicated tools.
+- The open-web fallback uses google.com as its search engine, through the browser.
+- At present the only user is the project owner, so lookups mostly replace searches the owner
+  would have made by hand, and the extra load on the approved sites is small. This is to be
+  revisited if Bill-GN is opened to more people.
 - Where the Slack features are in place, their time targets (features 002 and 003) are
   extended for questions that use a lookup to the limits in this specification, and the
   working-on-it indication covers the wait. Questions that use no lookup keep the earlier
