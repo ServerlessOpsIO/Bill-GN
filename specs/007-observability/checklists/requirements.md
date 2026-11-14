@@ -35,4 +35,5 @@
   independently.
 - No clarification markers remain; open choices are recorded as assumptions for the clarify
   phase.
+- Clarify session 2026-11-14: five questions answered by the project owner (following one question as a trace in the monitoring system, a minimal set of two alerts, how the health view and alerts are created, keeping the Slack identifier in records, which deployments are covered). Three review findings from #16 were fixed and the measurements extended to cover features 002 to 006 as clarified. Checklist re-validated by the spec author: 16/16 items pass, no change in state. Not reviewed independently.
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`
