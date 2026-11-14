@@ -4,6 +4,6 @@ version = 0.1
 [default.deploy]
 
 [default.deploy.parameters]
-stack_name = "slack-agent-poc"
+stack_name = "bill-gn"
 confirm_changeset = false
 capabilities = "CAPABILITY_NAMED_IAM"
